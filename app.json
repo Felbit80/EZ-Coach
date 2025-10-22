@@ -29,13 +29,8 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-font"
     ],
-    "scheme": "ezcoach",
-    "extra": {
-      "router": {
-        "origin": false
-      }
-    }
+    "scheme": "ezcoach"
   }
 }

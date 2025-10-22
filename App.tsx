@@ -1,3 +1,4 @@
+console.log('🚀 App.tsx está sendo executado!');
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -106,6 +107,7 @@ function AppContent() {
 }
 
 export default function App() {
+  console.log('✅ Função App executada');
   return (
     <SafeAreaProvider>
       <NavigationContainer>

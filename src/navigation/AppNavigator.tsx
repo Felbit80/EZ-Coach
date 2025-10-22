@@ -20,7 +20,7 @@ export const AppNavigator = () => {
         tabBarStyle: {
           backgroundColor: COLORS.card,
           borderTopColor: COLORS.border,
-          height: 60,
+          height: 100,
           paddingBottom: 8,
           paddingTop: 8
         },

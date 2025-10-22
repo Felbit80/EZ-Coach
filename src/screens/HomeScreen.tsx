@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
 import { supabase } from '../config/supabase';
@@ -44,80 +45,86 @@ export const HomeScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.greeting}>{getGreeting()},</Text>
-        <Text style={styles.userName}>{user?.name}</Text>
-      </View>
-
-      {currentTeam ? (
-        <>
-          <View style={styles.teamCard}>
-            <Text style={styles.teamEmoji}>{SPORTS[currentTeam.sport].emoji}</Text>
-            <View style={styles.teamInfo}>
-              <Text style={styles.teamName}>{currentTeam.name}</Text>
-              <Text style={styles.sportName}>{SPORTS[currentTeam.sport].name}</Text>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Próximos Eventos</Text>
-            {upcomingEvents.length > 0 ? (
-              upcomingEvents.map((event) => (
-                <View key={event.id} style={styles.eventCard}>
-                  <Text style={styles.eventType}>
-                    {event.type === 'training' && '🏋️ Treino'}
-                    {event.type === 'friendly' && '🤝 Amistoso'}
-                    {event.type === 'championship' && '🏆 Campeonato'}
-                    {event.type === 'meeting' && '👥 Reunião'}
-                  </Text>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <Text style={styles.eventDate}>
-                    {new Date(event.start_date).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: 'long',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>Nenhum evento agendado</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ações Rápidas</Text>
-            <View style={styles.quickActions}>
-              <TouchableOpacity style={styles.actionCard}>
-                <Text style={styles.actionEmoji}>📋</Text>
-                <Text style={styles.actionText}>Quadro Tático</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionCard}>
-                <Text style={styles.actionEmoji}>💬</Text>
-                <Text style={styles.actionText}>Chat</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionCard}>
-                <Text style={styles.actionEmoji}>📅</Text>
-                <Text style={styles.actionText}>Eventos</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </>
-      ) : (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>Nenhum time selecionado</Text>
-          <Text style={styles.emptyText}>Crie ou selecione um time para começar</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.greeting}>{getGreeting()},</Text>
+          <Text style={styles.userName}>{user?.name}</Text>
         </View>
-      )}
-    </ScrollView>
+
+        {currentTeam ? (
+          <>
+            <View style={styles.teamCard}>
+              <Text style={styles.teamEmoji}>{SPORTS[currentTeam.sport].emoji}</Text>
+              <View style={styles.teamInfo}>
+                <Text style={styles.teamName}>{currentTeam.name}</Text>
+                <Text style={styles.sportName}>{SPORTS[currentTeam.sport].name}</Text>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Próximos Eventos</Text>
+              {upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event) => (
+                  <View key={event.id} style={styles.eventCard}>
+                    <Text style={styles.eventType}>
+                      {event.type === 'training' && '🏋️ Treino'}
+                      {event.type === 'friendly' && '🤝 Amistoso'}
+                      {event.type === 'championship' && '🏆 Campeonato'}
+                      {event.type === 'meeting' && '👥 Reunião'}
+                    </Text>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventDate}>
+                      {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyText}>Nenhum evento agendado</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Ações Rápidas</Text>
+              <View style={styles.quickActions}>
+                <TouchableOpacity style={styles.actionCard}>
+                  <Text style={styles.actionEmoji}>📋</Text>
+                  <Text style={styles.actionText}>Quadro Tático</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionCard}>
+                  <Text style={styles.actionEmoji}>💬</Text>
+                  <Text style={styles.actionText}>Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionCard}>
+                  <Text style={styles.actionEmoji}>📅</Text>
+                  <Text style={styles.actionText}>Eventos</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Nenhum time selecionado</Text>
+            <Text style={styles.emptyText}>Crie ou selecione um time para começar</Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.primary
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background
@@ -125,7 +132,7 @@ const styles = StyleSheet.create({
   header: {
     padding: 24,
     backgroundColor: COLORS.primary,
-    paddingTop: 60
+    paddingTop: 24
   },
   greeting: {
     fontSize: 18,

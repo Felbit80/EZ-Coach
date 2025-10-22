@@ -6,6 +6,7 @@ import { Event, EventType } from '../types';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { COLORS } from '../config/sports';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const CalendarScreen = () => {
   const { currentTeam } = useTeam();
@@ -117,9 +118,10 @@ export const CalendarScreen = () => {
   }
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Calendário</Text>
+        <Text style={styles.title}>Calendário </Text>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setShowCreateModal(true)}
@@ -238,10 +240,15 @@ export const CalendarScreen = () => {
         </View>
       </Modal>
     </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background
@@ -388,7 +395,7 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   },
   modalButtons: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 12,
     marginTop: 16
   }
