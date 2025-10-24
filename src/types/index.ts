@@ -1,4 +1,4 @@
-export type SportType = 'volleyball' | 'basketball' | 'handball' | 'futsal' | 'football';
+export type SportType = "volleyball" | "basketball" | "handball" | "futsal" | "football";
 
 export interface Sport {
   id: SportType;
@@ -21,7 +21,7 @@ export interface User {
   subscription_plan: SubscriptionPlan;
 }
 
-export type SubscriptionPlan = 'free' | 'premium' | 'premium_pro';
+export type SubscriptionPlan = "free" | "premium" | "premium_pro";
 
 export interface PlanLimits {
   teams: number;
@@ -29,7 +29,7 @@ export interface PlanLimits {
   chats: number;
 }
 
-export type UserRole = 'coach' | 'captain' | 'athlete';
+export type UserRole = "coach" | "captain" | "athlete";
 
 export interface Team {
   id: string;
@@ -75,7 +75,7 @@ export interface Chat {
   id: string;
   team_id: string;
   name: string;
-  type: 'general' | 'strategy' | 'training';
+  type: "general" | "strategy" | "training";
   created_at: string;
 }
 
@@ -91,7 +91,7 @@ export interface Message {
   };
 }
 
-export type EventType = 'training' | 'friendly' | 'championship' | 'meeting';
+export type EventType = "training" | "friendly" | "championship" | "meeting";
 
 export interface Event {
   id: string;
@@ -113,5 +113,5 @@ export interface Exercise {
   name: string;
   description: string;
   video_url?: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
 }

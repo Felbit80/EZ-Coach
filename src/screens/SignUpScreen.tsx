@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { useAuth } from '../contexts/AuthContext';
-import { COLORS } from '../config/sports';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { useAuth } from "../contexts/AuthContext";
+import { COLORS } from "../config/sports";
 
 interface SignUpScreenProps {
   onNavigateToLogin: () => void;
@@ -11,10 +11,10 @@ interface SignUpScreenProps {
 
 export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin }) => {
   const { signUp } = useAuth();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
@@ -27,25 +27,25 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
     const newErrors: any = {};
 
     if (!name) {
-      newErrors.name = 'Nome é obrigatório';
+      newErrors.name = "Nome é obrigatório";
     }
 
     if (!email) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = "Email é obrigatório";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = "Email inválido";
     }
 
     if (!password) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = "Senha é obrigatória";
     } else if (password.length < 6) {
-      newErrors.password = 'Senha deve ter no mínimo 6 caracteres';
+      newErrors.password = "Senha deve ter no mínimo 6 caracteres";
     }
 
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'Confirme sua senha';
+      newErrors.confirmPassword = "Confirme sua senha";
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'As senhas não coincidem';
+      newErrors.confirmPassword = "As senhas não coincidem";
     }
 
     setErrors(newErrors);
@@ -58,9 +58,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
     try {
       setLoading(true);
       await signUp(email, password, name);
-      Alert.alert('Sucesso', 'Conta criada com sucesso!');
+      Alert.alert("Sucesso", "Conta criada com sucesso!");
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao criar conta');
+      Alert.alert("Erro", error.message || "Erro ao criar conta");
     } finally {
       setLoading(false);
     }
@@ -75,13 +75,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
       </View>
 
       <View style={styles.form}>
-        <Input
-          label="Nome Completo"
-          value={name}
-          onChangeText={setName}
-          placeholder="Seu nome"
-          error={errors.name}
-        />
+        <Input label="Nome Completo" value={name} onChangeText={setName} placeholder="Seu nome" error={errors.name} />
         <Input
           label="Email"
           value={email}
@@ -90,14 +84,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
           keyboardType="email-address"
           error={errors.email}
         />
-        <Input
-          label="Senha"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          secureTextEntry
-          error={errors.password}
-        />
+        <Input label="Senha" value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry error={errors.password} />
         <Input
           label="Confirmar Senha"
           value={confirmPassword}
@@ -107,19 +94,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
           error={errors.confirmPassword}
         />
 
-        <Button
-          title="Criar Conta"
-          onPress={handleSignUp}
-          loading={loading}
-          fullWidth
-        />
+        <Button title="Criar Conta" onPress={handleSignUp} loading={loading} fullWidth />
 
-        <Button
-          title="Já tenho conta"
-          onPress={onNavigateToLogin}
-          variant="outline"
-          fullWidth
-        />
+        <Button title="Já tenho conta" onPress={onNavigateToLogin} variant="outline" fullWidth />
       </View>
     </ScrollView>
   );
@@ -128,32 +105,32 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 24,
-    justifyContent: 'center',
-    minHeight: '100%'
+    justifyContent: "center",
+    minHeight: "100%",
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 40
+    alignItems: "center",
+    marginBottom: 40,
   },
   emoji: {
     fontSize: 80,
-    marginBottom: 16
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
-    marginBottom: 8
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.textSecondary
+    color: COLORS.textSecondary,
   },
   form: {
-    gap: 16
-  }
+    gap: 16,
+  },
 });

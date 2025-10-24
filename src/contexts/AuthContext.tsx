@@ -21,7 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carrega a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
@@ -31,7 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Escuta mudanças de autenticação
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -52,16 +50,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log("🔄 Carregando perfil do usuário:", userId);
 
-      const { data, error } = await supabase
-        .from("users") // ✅ CORRETO: sua tabela se chama 'users'
-        .select("*")
-        .eq("id", userId)
-        .single();
+      const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
 
       if (error) {
         console.error("❌ Erro ao carregar perfil:", error);
 
-        // Se o perfil não existe, cria um novo
         if (error.code === "PGRST116") {
           await createUserProfile(userId);
           return;
@@ -85,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: authUser, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
 
-      // Pequeno delay para garantir que o usuário do auth está disponível
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const { data, error } = await supabase
@@ -102,7 +94,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error("❌ Erro ao criar perfil:", error);
 
-        // Tenta novamente após 2 segundos
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         const { data: retryData, error: retryError } = await supabase
@@ -155,35 +146,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
 
-      // 1. Cria usuário no Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            name: name,
+          }
+        }
       });
 
       if (authError) throw authError;
 
-      // 2. Se usuário foi criado, cria perfil na tabela users
       if (authData.user) {
         console.log("🔄 Criando perfil para novo usuário:", authData.user.id);
 
-        const { error: profileError } = await supabase
-          .from("users") // ✅ CORRETO: sua tabela se chama 'users'
-          .insert({
-            id: authData.user.id,
-            email: email,
-            name: name, // ✅ CORRETO: campo 'name'
-            subscription_plan: "free",
-          });
+        const { error: profileError } = await supabase.from("users").insert({
+          id: authData.user.id,
+          email: email,
+          name: name,
+          subscription_plan: "free",
+        });
 
         if (profileError) {
           console.error("❌ Erro ao criar perfil:", profileError);
-          // Se falhar ao criar perfil, deleta o usuário do auth
-          await supabase.auth.signOut();
-          throw new Error("Erro ao criar perfil do usuário");
+          
+          console.log("⚠️ Erro no perfil, mas usuário está autenticado");
         }
 
         console.log("✅ Usuário e perfil criados com sucesso");
+        
+        await loadUserProfile(authData.user.id);
       }
     } catch (error: any) {
       console.error("❌ Erro no cadastro:", error);
@@ -207,10 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from("users") // ✅ CORRETO: sua tabela se chama 'users'
-        .update({ subscription_plan: plan })
-        .eq("id", user.id);
+      const { error } = await supabase.from("users").update({ subscription_plan: plan }).eq("id", user.id);
 
       if (error) throw error;
       setUser({ ...user, subscription_plan: plan });

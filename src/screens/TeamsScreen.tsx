@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Image } from "react-native";
 import { useTeam } from "../contexts/TeamContext";
 import { useAuth } from "../contexts/AuthContext";
 import { TeamCard } from "../components/TeamCard";
@@ -9,17 +9,29 @@ import { SportCard } from "../components/SportCard";
 import { COLORS, SPORTS, PLAN_LIMITS } from "../config/sports";
 import { SportType, UserRole } from "../types";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { EditMemberModal } from "../components/EditMemberModal";
+import { TeamMember } from "../types/index";
+import { TeamMemberWithUser } from "../contexts/TeamContext";
 
 export const TeamsScreen = () => {
   const { user } = useAuth();
-  const { teams, currentTeam, selectTeam, createTeam, inviteMember, teamMembers } = useTeam();
+  const { teams, currentTeam, selectTeam, createTeam, updateTeam, deleteTeam, inviteMember, teamMembers } = useTeam();
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showEditTeamModal, setShowEditTeamModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const [newTeamName, setNewTeamName] = useState("");
+  const [editTeamName, setEditTeamName] = useState("");
   const [selectedSport, setSelectedSport] = useState<SportType>("volleyball");
+  const [editSelectedSport, setEditSelectedSport] = useState<SportType>("volleyball");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<UserRole>("athlete");
   const [loading, setLoading] = useState(false);
+  const [showEditMemberModal, setShowEditMemberModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMemberWithUser | null>(null);
+  const { removeMember, updateMember } = useTeam();
 
   const canCreateTeam = () => {
     if (!user) return false;
@@ -78,21 +90,90 @@ export const TeamsScreen = () => {
     }
   };
 
+  const handleEditTeam = async () => {
+    if (!currentTeam) return;
+
+    if (!editTeamName.trim()) {
+      Alert.alert("Erro", "Digite um nome para o time");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await updateTeam(currentTeam.id, {
+        name: editTeamName.trim(),
+        sport: editSelectedSport,
+      });
+      setShowEditTeamModal(false);
+      Alert.alert("Sucesso", "Time atualizado com sucesso!");
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Erro ao atualizar time");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteTeam = async () => {
+    if (!currentTeam) return;
+
+    try {
+      setLoading(true);
+      await deleteTeam(currentTeam.id);
+      setShowDeleteConfirm(false);
+      Alert.alert("Sucesso", "Time excluído com sucesso!");
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Erro ao excluir time");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditModal = () => {
+    if (!currentTeam) return;
+    setEditTeamName(currentTeam.name);
+    setEditSelectedSport(currentTeam.sport);
+    setShowEditTeamModal(true);
+  };
+
+  const openDeleteConfirm = () => {
+    if (!currentTeam) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const handleEditMember = (member: TeamMemberWithUser) => {
+    setSelectedMember(member);
+    setShowEditMemberModal(true);
+  };
+
+  const handleSaveMember = async (memberId: string, updates: Partial<TeamMember>) => {
+    await updateMember(memberId, updates);
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    await removeMember(memberId);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <View style={styles.container}>
         <ScrollView style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>Meus Times </Text>
+            <Text style={styles.title}>Meus Times</Text>
             <TouchableOpacity style={styles.addButton} onPress={() => setShowCreateModal(true)}>
               <Text style={styles.addButtonText}>+ Novo Time</Text>
             </TouchableOpacity>
           </View>
-
           {teams.map((team) => (
-            <TeamCard key={team.id} team={team} selected={currentTeam?.id === team.id} onPress={() => selectTeam(team)} />
+            <TeamCard
+              key={team.id}
+              team={team}
+              selected={currentTeam?.id === team.id}
+              onPress={() => selectTeam(team)}
+              onEdit={openEditModal}
+              onDelete={openDeleteConfirm}
+              showActions={currentTeam?.id === team.id}
+            />
           ))}
-
           {teams.length === 0 && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>Você ainda não tem times</Text>
@@ -111,18 +192,35 @@ export const TeamsScreen = () => {
                 </View>
 
                 {teamMembers.map((member) => (
-                  <View key={member.id} style={styles.memberCard}>
+                  <TouchableOpacity key={member.id} style={styles.memberCard} onPress={() => handleEditMember(member)} activeOpacity={0.7}>
                     <View style={styles.memberInfo}>
-                      <Text style={styles.memberName}>Membro {member.user_id.slice(0, 8)}</Text>
-                      <Text style={styles.memberRole}>
-                        {member.role === "coach" && "👨‍🏫 Treinador"}
-                        {member.role === "captain" && "👑 Capitão"}
-                        {member.role === "athlete" && "🏃 Atleta"}
-                      </Text>
+                      <Text style={styles.memberName}>{member.user?.name || `Usuário ${member.user_id.slice(0, 8)}`}</Text>
+                      <Text style={styles.memberEmail}>{member.user?.email || "Email não disponível"}</Text>
+                      <View style={styles.memberDetails}>
+                        <Text style={styles.memberRole}>
+                          {member.role === "coach" && "👨‍🏫 Treinador"}
+                          {member.role === "captain" && "👑 Capitão"}
+                          {member.role === "athlete" && "🏃 Atleta"}
+                        </Text>
+                        {member.position && <Text style={styles.memberPosition}>• {member.position}</Text>}
+                        {member.jersey_number && <Text style={styles.jerseyNumber}>• #{member.jersey_number}</Text>}
+                      </View>
                     </View>
-                    {member.position && <Text style={styles.memberPosition}>{member.position}</Text>}
-                  </View>
+
+                    {/* Ícone de edição */}
+                    <View style={styles.editIcon}>
+                      <Text style={styles.editIconText}>✏️</Text>
+                      <Text style={styles.editHint}>Editar</Text>
+                    </View>
+                  </TouchableOpacity>
                 ))}
+
+                {teamMembers.length === 0 && (
+                  <View style={styles.emptyMembers}>
+                    <Text style={styles.emptyMembersText}>Nenhum membro no time</Text>
+                    <Text style={styles.emptyMembersSubtext}>Convide membros para participar</Text>
+                  </View>
+                )}
               </View>
             </>
           )}
@@ -196,6 +294,65 @@ export const TeamsScreen = () => {
             </View>
           </View>
         </Modal>
+
+        {/* 🔥 MODAL DE CONFIRMAÇÃO DE EXCLUSÃO - NOVO */}
+        <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, styles.deleteModal]}>
+              <Text style={styles.deleteTitle}>Excluir Time</Text>
+              <Text style={styles.deleteText}>
+                Tem certeza que deseja excluir o time "{currentTeam?.name}"? Esta ação não pode ser desfeita.
+              </Text>
+
+              <View style={styles.modalButtons}>
+                <Button title="Cancelar" onPress={() => setShowDeleteConfirm(false)} variant="outline" fullWidth />
+                <Button title="Excluir Time" onPress={handleDeleteTeam} loading={loading} fullWidth />
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* 🔥 MODAL DE EDIÇÃO DE TIME - NOVO */}
+        <Modal visible={showEditTeamModal} animationType="slide" transparent onRequestClose={() => setShowEditTeamModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Editar Time</Text>
+
+              <Input label="Nome do Time" value={editTeamName} onChangeText={setEditTeamName} placeholder="Ex: Equipe Campeã" />
+
+              <Text style={styles.label}>Esporte</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sportsList}>
+                {Object.values(SPORTS).map((sport) => (
+                  <TouchableOpacity
+                    key={sport.id}
+                    style={[styles.sportOption, editSelectedSport === sport.id && styles.sportOptionSelected]}
+                    onPress={() => setEditSelectedSport(sport.id)}
+                  >
+                    <Text style={styles.sportEmoji}>{sport.emoji}</Text>
+                    <Text style={styles.sportName}>{sport.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <View style={styles.modalButtons}>
+                <Button title="Cancelar" onPress={() => setShowEditTeamModal(false)} variant="outline" fullWidth />
+                <Button title="Salvar Alterações" onPress={handleEditTeam} loading={loading} fullWidth />
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <EditMemberModal
+          visible={showEditMemberModal}
+          member={selectedMember}
+          teamSport={currentTeam?.sport || "volleyball"}
+          onSave={handleSaveMember}
+          onRemove={handleRemoveMember}
+          onClose={() => {
+            setShowEditMemberModal(false);
+            setSelectedMember(null);
+          }}
+        />
       </View>
     </SafeAreaView>
   );
@@ -361,5 +518,68 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "column",
     gap: 12,
+  },
+  memberEmail: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+  },
+  emptyMembers: {
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  emptyMembersText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+  },
+  emptyMembersSubtext: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    opacity: 0.7,
+  },
+  deleteModal: {
+    maxWidth: 400,
+  },
+  deleteTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.error,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  deleteText: {
+    fontSize: 16,
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  jerseyNumber: {
+    fontSize: 14,
+    color: COLORS.secondary,
+    fontWeight: "600",
+  },
+  editIcon: {
+    alignItems: "center",
+    paddingLeft: 12,
+  },
+  editIconText: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  editHint: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    opacity: 0.7,
+  },
+  memberDetails: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
   },
 });

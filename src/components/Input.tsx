@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, TextInput, Text, StyleSheet } from 'react-native';
-import { COLORS } from '../config/sports';
+import React from "react";
+import { View, TextInput, Text, StyleSheet } from "react-native";
+import { COLORS } from "../config/sports";
 
 interface InputProps {
   label: string;
@@ -8,7 +8,7 @@ interface InputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   error?: string;
   multiline?: boolean;
 }
@@ -19,9 +19,9 @@ export const Input: React.FC<InputProps> = ({
   onChangeText,
   placeholder,
   secureTextEntry,
-  keyboardType = 'default',
+  keyboardType = "default",
   error,
-  multiline = false
+  multiline = false,
 }) => {
   return (
     <View style={styles.container}>
@@ -44,13 +44,13 @@ export const Input: React.FC<InputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
-    marginBottom: 8
+    marginBottom: 8,
   },
   input: {
     backgroundColor: COLORS.card,
@@ -60,18 +60,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: COLORS.text
+    color: COLORS.text,
   },
   inputError: {
-    borderColor: COLORS.error
+    borderColor: COLORS.error,
   },
   multiline: {
     minHeight: 100,
-    textAlignVertical: 'top'
+    textAlignVertical: "top",
   },
   errorText: {
     color: COLORS.error,
     fontSize: 12,
-    marginTop: 4
-  }
+    marginTop: 4,
+  },
 });

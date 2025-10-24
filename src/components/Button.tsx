@@ -1,11 +1,11 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { COLORS } from '../config/sports';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { COLORS } from "../config/sports";
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: "primary" | "secondary" | "outline";
   loading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
@@ -14,33 +14,33 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'primary',
+  variant = "primary",
   loading = false,
   disabled = false,
-  fullWidth = false
+  fullWidth = false,
 }) => {
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        variant === 'primary' && styles.primaryButton,
-        variant === 'secondary' && styles.secondaryButton,
-        variant === 'outline' && styles.outlineButton,
+        variant === "primary" && styles.primaryButton,
+        variant === "secondary" && styles.secondaryButton,
+        variant === "outline" && styles.outlineButton,
         fullWidth && styles.fullWidth,
-        (disabled || loading) && styles.disabled
+        (disabled || loading) && styles.disabled,
       ]}
       onPress={onPress}
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? COLORS.primary : '#FFFFFF'} />
+        <ActivityIndicator color={variant === "outline" ? COLORS.primary : "#FFFFFF"} />
       ) : (
         <Text
           style={[
             styles.buttonText,
-            variant === 'primary' && styles.primaryText,
-            variant === 'secondary' && styles.secondaryText,
-            variant === 'outline' && styles.outlineText
+            variant === "primary" && styles.primaryText,
+            variant === "secondary" && styles.secondaryText,
+            variant === "outline" && styles.outlineText,
           ]}
         >
           {title}
@@ -55,38 +55,38 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50,
   },
   primaryButton: {
-    backgroundColor: COLORS.primary
+    backgroundColor: COLORS.primary,
   },
   secondaryButton: {
-    backgroundColor: COLORS.secondary
+    backgroundColor: COLORS.secondary,
   },
   outlineButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: COLORS.primary
+    borderColor: COLORS.primary,
   },
   fullWidth: {
-    width: '100%'
+    width: "100%",
   },
   disabled: {
-    opacity: 0.5
+    opacity: 0.5,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600'
+    fontWeight: "600",
   },
   primaryText: {
-    color: '#FFFFFF'
+    color: "#FFFFFF",
   },
   secondaryText: {
-    color: '#FFFFFF'
+    color: "#FFFFFF",
   },
   outlineText: {
-    color: COLORS.primary
-  }
+    color: COLORS.primary,
+  },
 });

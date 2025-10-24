@@ -8,14 +8,20 @@ import { Input } from "../components/Input";
 import { PlayerMarker } from "../components/PlayerMarker";
 import { COLORS, SPORTS } from "../config/sports";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../contexts/AuthContext";
+import { DraggablePlayer } from "../components/DraggablePlayer";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export const TacticalScreen = () => {
   const { currentTeam } = useTeam();
+  const { user } = useAuth();
   const [formations, setFormations] = useState<Formation[]>([]);
   const [currentFormation, setCurrentFormation] = useState<Formation | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [formationName, setFormationName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [formationToDelete, setFormationToDelete] = useState<Formation | null>(null);
 
   useEffect(() => {
     if (currentTeam) {
@@ -70,7 +76,7 @@ export const TacticalScreen = () => {
   };
 
   const handleSaveFormation = async () => {
-    if (!currentFormation || !currentTeam) return;
+    if (!currentFormation || !currentTeam || !user) return;
 
     if (!formationName.trim()) {
       Alert.alert("Erro", "Digite um nome para a formação");
@@ -81,20 +87,28 @@ export const TacticalScreen = () => {
       setLoading(true);
 
       if (currentFormation.id === "new") {
-        const { error } = await supabase.from("formations").insert({
-          team_id: currentTeam.id,
-          name: formationName.trim(),
-          sport: currentTeam.sport,
-          players: currentFormation.players,
-        });
+        const { data, error } = await supabase
+          .from("formations")
+          .insert({
+            team_id: currentTeam.id,
+            name: formationName.trim(),
+            sport: currentTeam.sport,
+            players: currentFormation.players,
+            created_by: user.id,
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+
+        setCurrentFormation(data);
       } else {
         const { error } = await supabase
           .from("formations")
           .update({
             name: formationName.trim(),
             players: currentFormation.players,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", currentFormation.id);
 
@@ -104,12 +118,88 @@ export const TacticalScreen = () => {
       setShowSaveModal(false);
       setFormationName("");
       await loadFormations();
-      Alert.alert("Sucesso", "Formação salva com sucesso!");
+
+      Alert.alert("Sucesso", "Formação salva com sucesso!", [
+        {
+          text: "OK",
+          onPress: () => {
+            setCurrentFormation(null);
+          },
+        },
+      ]);
     } catch (error: any) {
+      console.error("Erro ao salvar formação:", error);
       Alert.alert("Erro", error.message || "Erro ao salvar formação");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteFormation = async () => {
+    if (!formationToDelete) return;
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.from("formations").delete().eq("id", formationToDelete.id);
+
+      if (error) throw error;
+
+      setShowDeleteConfirm(false);
+      setFormationToDelete(null);
+
+      if (currentFormation?.id === formationToDelete.id) {
+        setCurrentFormation(null);
+      }
+
+      await loadFormations();
+      Alert.alert("Sucesso", "Formação excluída com sucesso!");
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Erro ao excluir formação");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDuplicateFormation = async (formation: Formation) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("formations")
+        .insert({
+          team_id: formation.team_id,
+          name: `${formation.name} (Cópia)`,
+          sport: formation.sport,
+          players: formation.players,
+          created_by: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await loadFormations();
+      Alert.alert("Sucesso", "Formação duplicada com sucesso!");
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Erro ao duplicar formação");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openDeleteConfirm = (formation: Formation) => {
+    setFormationToDelete(formation);
+    setShowDeleteConfirm(true);
+  };
+
+  const handlePlayerDrag = (playerId: string, x: number, y: number) => {
+    if (!currentFormation) return;
+
+    const updatedPlayers = currentFormation.players.map((player) => (player.id === playerId ? { ...player, x, y } : player));
+
+    setCurrentFormation({
+      ...currentFormation,
+      players: updatedPlayers,
+    });
   };
 
   if (!currentTeam) {
@@ -136,16 +226,26 @@ export const TacticalScreen = () => {
           {currentFormation ? (
             <View style={styles.courtContainer}>
               <View style={styles.courtHeader}>
-                <Text style={styles.courtTitle}>
-                  {sport.name} - {currentFormation.name}
-                </Text>
-                <Button
-                  title="Salvar"
-                  onPress={() => {
-                    setFormationName(currentFormation.name);
-                    setShowSaveModal(true);
-                  }}
-                />
+                <View style={styles.courtTitleContainer}>
+                  <Text style={styles.courtTitle}>
+                    {sport.name} - {currentFormation.name}
+                  </Text>
+                  <Text style={styles.courtSubtitle}>{currentFormation.players.length} jogadores</Text>
+                </View>
+
+                <View style={styles.courtActions}>
+                  <TouchableOpacity style={styles.backButton} onPress={() => setCurrentFormation(null)}>
+                    <Text style={styles.backButtonText}>← Voltar</Text>
+                  </TouchableOpacity>
+
+                  <Button
+                    title="Salvar"
+                    onPress={() => {
+                      setFormationName(currentFormation.name);
+                      setShowSaveModal(true);
+                    }}
+                  />
+                </View>
               </View>
 
               <View
@@ -160,11 +260,15 @@ export const TacticalScreen = () => {
                 {/* Court background based on sport */}
                 {currentTeam.sport === "volleyball" && <View style={styles.volleyballNet} />}
 
-                {/* Players */}
+                {/* Players - AGORA ARRASTÁVEIS */}
                 {currentFormation.players.map((player) => (
-                  <View key={player.id} style={[styles.playerContainer, { left: player.x, top: player.y }]}>
-                    <PlayerMarker number={player.jersey_number} position={player.position} />
-                  </View>
+                  <DraggablePlayer
+                    key={player.id}
+                    player={player}
+                    onDrag={handlePlayerDrag}
+                    courtWidth={sport.courtDimensions.width}
+                    courtHeight={sport.courtDimensions.height}
+                  />
                 ))}
               </View>
 
@@ -176,10 +280,36 @@ export const TacticalScreen = () => {
             <>
               <Text style={styles.sectionTitle}>Formações Salvas</Text>
               {formations.map((formation) => (
-                <TouchableOpacity key={formation.id} style={styles.formationCard} onPress={() => setCurrentFormation(formation)}>
-                  <Text style={styles.formationName}>{formation.name}</Text>
-                  <Text style={styles.formationInfo}>{formation.players.length} jogadores</Text>
-                </TouchableOpacity>
+                <View key={formation.id} style={styles.formationCard}>
+                  <TouchableOpacity style={styles.formationContent} onPress={() => setCurrentFormation(formation)}>
+                    <Text style={styles.formationName}>{formation.name}</Text>
+                    <Text style={styles.formationInfo}>
+                      {formation.players.length} jogadores • {formation.sport}
+                    </Text>
+                    <Text style={styles.formationDate}>Criada em {new Date(formation.created_at).toLocaleDateString("pt-BR")}</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.formationActions}>
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => {
+                        setCurrentFormation(formation);
+                        setFormationName(formation.name);
+                        setShowSaveModal(true);
+                      }}
+                    >
+                      <Text style={styles.actionButtonText}>✏️</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton} onPress={() => handleDuplicateFormation(formation)}>
+                      <Text style={styles.actionButtonText}>📋</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.actionButton, styles.deleteAction]} onPress={() => openDeleteConfirm(formation)}>
+                      <Text style={styles.actionButtonText}>🗑️</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               ))}
 
               {formations.length === 0 && (
@@ -203,6 +333,22 @@ export const TacticalScreen = () => {
               <View style={styles.modalButtons}>
                 <Button title="Cancelar" onPress={() => setShowSaveModal(false)} variant="outline" fullWidth />
                 <Button title="Salvar" onPress={handleSaveFormation} loading={loading} fullWidth />
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, styles.deleteModal]}>
+              <Text style={styles.deleteTitle}>Excluir Formação</Text>
+              <Text style={styles.deleteText}>
+                Tem certeza que deseja excluir a formação "{formationToDelete?.name}"? Esta ação não pode ser desfeita.
+              </Text>
+
+              <View style={styles.modalButtons}>
+                <Button title="Cancelar" onPress={() => setShowDeleteConfirm(false)} variant="outline" fullWidth />
+                <Button title="Excluir Formação" onPress={handleDeleteFormation} loading={loading} fullWidth />
               </View>
             </View>
           </View>
@@ -254,6 +400,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     alignItems: "center",
+    marginBottom: 30,
   },
   courtHeader: {
     flexDirection: "row",
@@ -305,12 +452,6 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 12,
   },
-  formationCard: {
-    backgroundColor: COLORS.card,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
   formationName: {
     fontSize: 18,
     fontWeight: "600",
@@ -357,5 +498,78 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "column",
     gap: 12,
+  },
+  formationDate: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    opacity: 0.7,
+  },
+  formationActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: `${COLORS.primary}15`,
+  },
+  deleteAction: {
+    backgroundColor: `${COLORS.error}15`,
+  },
+  actionButtonText: {
+    fontSize: 16,
+  },
+  deleteModal: {
+    maxWidth: 400,
+  },
+  deleteTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.error,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  deleteText: {
+    fontSize: 16,
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  courtTitleContainer: {
+    flex: 1,
+  },
+  courtSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  courtActions: {
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  backButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.background,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: "500",
+  },
+  formationCard: {
+    backgroundColor: COLORS.card,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  formationContent: {
+    flex: 1,
   },
 });

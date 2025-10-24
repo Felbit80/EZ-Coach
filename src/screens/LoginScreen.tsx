@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { useAuth } from '../contexts/AuthContext';
-import { COLORS } from '../config/sports';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { useAuth } from "../contexts/AuthContext";
+import { COLORS } from "../config/sports";
 
 interface LoginScreenProps {
   onNavigateToSignUp: () => void;
@@ -11,8 +11,8 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) => {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -20,15 +20,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
     const newErrors: { email?: string; password?: string } = {};
 
     if (!email) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = "Email é obrigatório";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = "Email inválido";
     }
 
     if (!password) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = "Senha é obrigatória";
     } else if (password.length < 6) {
-      newErrors.password = 'Senha deve ter no mínimo 6 caracteres';
+      newErrors.password = "Senha deve ter no mínimo 6 caracteres";
     }
 
     setErrors(newErrors);
@@ -42,7 +42,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
       setLoading(true);
       await signIn(email, password);
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao fazer login');
+      Alert.alert("Erro", error.message || "Erro ao fazer login");
     } finally {
       setLoading(false);
     }
@@ -65,28 +65,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
           keyboardType="email-address"
           error={errors.email}
         />
-        <Input
-          label="Senha"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          secureTextEntry
-          error={errors.password}
-        />
+        <Input label="Senha" value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry error={errors.password} />
 
-        <Button
-          title="Entrar"
-          onPress={handleLogin}
-          loading={loading}
-          fullWidth
-        />
+        <Button title="Entrar" onPress={handleLogin} loading={loading} fullWidth />
 
-        <Button
-          title="Criar conta"
-          onPress={onNavigateToSignUp}
-          variant="outline"
-          fullWidth
-        />
+        <Button title="Criar conta" onPress={onNavigateToSignUp} variant="outline" fullWidth />
       </View>
     </ScrollView>
   );
@@ -95,32 +78,32 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 24,
-    justifyContent: 'center',
-    minHeight: '100%'
+    justifyContent: "center",
+    minHeight: "100%",
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 40
+    alignItems: "center",
+    marginBottom: 40,
   },
   emoji: {
     fontSize: 80,
-    marginBottom: 16
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
-    marginBottom: 8
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.textSecondary
+    color: COLORS.textSecondary,
   },
   form: {
-    gap: 16
-  }
+    gap: 16,
+  },
 });

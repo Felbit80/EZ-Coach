@@ -3,10 +3,19 @@ import { supabase } from "../config/supabase";
 import { Team, TeamMember } from "../types";
 import { useAuth } from "./AuthContext";
 
+export interface TeamMemberWithUser extends TeamMember {
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url?: string;
+  };
+}
+
 interface TeamContextData {
   teams: Team[];
   currentTeam: Team | null;
-  teamMembers: TeamMember[];
+  teamMembers: TeamMemberWithUser[];
   loading: boolean;
   selectTeam: (team: Team) => void;
   createTeam: (team: Omit<Team, "id" | "created_at" | "updated_at" | "created_by">) => Promise<Team>;
@@ -14,6 +23,12 @@ interface TeamContextData {
   deleteTeam: (id: string) => Promise<void>;
   loadTeams: () => Promise<void>;
   inviteMember: (teamId: string, email: string, role: TeamMember["role"]) => Promise<void>;
+  removeMember: (memberId: string) => Promise<void>;
+  updateMember: (memberId: string, updates: Partial<TeamMember>) => Promise<void>;
+  leaveTeam: (teamId: string) => Promise<void>;
+  updateEvent: (eventId: string, updates: Partial<Event>) => Promise<void>;
+  deleteEvent: (eventId: string) => Promise<void>;
+  loadEvents: (teamId: string) => Promise<Event[]>;
 }
 
 const TeamContext = createContext<TeamContextData>({} as TeamContextData);
@@ -22,7 +37,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMemberWithUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,17 +58,14 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
 
-      // PRIMEIRO: Busca times onde o usuário é o criador
       const { data: ownedTeams, error: ownedError } = await supabase.from("teams").select("*").eq("created_by", user.id);
 
       if (ownedError) throw ownedError;
 
-      // SEGUNDO: Busca times onde o usuário é membro
       const { data: memberTeams, error: memberError } = await supabase.from("team_members").select("team_id").eq("user_id", user.id);
 
       if (memberError) throw memberError;
 
-      // Se o usuário é membro de outros times, busca os dados desses times
       let teamsWhereMember: Team[] = [];
       if (memberTeams && memberTeams.length > 0) {
         const teamIds = memberTeams.map((member) => member.team_id);
@@ -63,11 +75,9 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
         teamsWhereMember = memberTeamData || [];
       }
 
-      // Combina os dois resultados, removendo duplicatas
       const allTeams = [...(ownedTeams || []), ...teamsWhereMember];
       const uniqueTeams = allTeams.filter((team, index, self) => index === self.findIndex((t) => t.id === team.id));
 
-      // Ordena por data de criação
       uniqueTeams.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setTeams(uniqueTeams);
@@ -84,12 +94,46 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadTeamMembers = async (teamId: string) => {
     try {
-      const { data, error } = await supabase.from("team_members").select("*").eq("team_id", teamId);
+      console.log("🔄 Carregando membros do time:", teamId);
 
-      if (error) throw error;
-      setTeamMembers(data || []);
+      const { data: membersData, error: membersError } = await supabase.from("team_members").select("*").eq("team_id", teamId);
+
+      if (membersError) throw membersError;
+
+      if (!membersData || membersData.length === 0) {
+        setTeamMembers([]);
+        return;
+      }
+
+      const userIds = membersData.map((member) => member.user_id);
+      console.log("👥 IDs dos usuários para buscar:", userIds);
+
+      const { data: usersData, error: usersError } = await supabase.from("users").select("id, name, email, avatar_url").in("id", userIds);
+
+      if (usersError) throw usersError;
+
+      console.log("✅ Dados dos usuários encontrados:", usersData);
+
+      const membersWithUserInfo: TeamMemberWithUser[] = membersData.map((member) => {
+        const userInfo = usersData?.find((user) => user.id === member.user_id);
+        return {
+          ...member,
+          user: userInfo
+            ? {
+                id: userInfo.id,
+                name: userInfo.name,
+                email: userInfo.email,
+                avatar_url: userInfo.avatar_url,
+              }
+            : undefined,
+        };
+      });
+
+      console.log("🎯 Membros com informações completas:", membersWithUserInfo);
+      setTeamMembers(membersWithUserInfo);
     } catch (error) {
-      console.error("Error loading team members:", error);
+      console.error("❌ Erro ao carregar membros do time:", error);
+      setTeamMembers([]);
     }
   };
 
@@ -111,7 +155,6 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (error) throw error;
 
-    // Add creator as coach
     await supabase.from("team_members").insert({
       team_id: data.id,
       user_id: user.id,
@@ -138,7 +181,6 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const inviteMember = async (teamId: string, email: string, role: TeamMember["role"]) => {
     try {
-      // Busca o usuário pelo email
       const { data: userData, error: userError } = await supabase.from("users").select("id").eq("email", email).single();
 
       if (userError) {
@@ -152,7 +194,6 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Usuário não encontrado");
       }
 
-      // Verifica se o usuário já é membro do time
       const { data: existingMember, error: checkError } = await supabase
         .from("team_members")
         .select("id")
@@ -164,7 +205,6 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Este usuário já é membro do time");
       }
 
-      // Adiciona como membro
       const { error: insertError } = await supabase.from("team_members").insert({
         team_id: teamId,
         user_id: userData.id,
@@ -173,10 +213,105 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (insertError) throw insertError;
 
-      // Recarrega os membros
       await loadTeamMembers(teamId);
     } catch (error: any) {
       console.error("Error inviting member:", error);
+      throw error;
+    }
+  };
+
+  const removeMember = async (memberId: string) => {
+    if (!currentTeam) throw new Error("Nenhum time selecionado");
+
+    try {
+      const { error } = await supabase.from("team_members").delete().eq("id", memberId).eq("team_id", currentTeam.id);
+
+      if (error) throw error;
+
+      await loadTeamMembers(currentTeam.id);
+    } catch (error: any) {
+      console.error("Error removing member:", error);
+      throw error;
+    }
+  };
+
+  const updateMember = async (memberId: string, updates: Partial<TeamMember>) => {
+    try {
+      const { error } = await supabase.from("team_members").update(updates).eq("id", memberId);
+
+      if (error) throw error;
+
+      if (currentTeam) {
+        await loadTeamMembers(currentTeam.id);
+      }
+    } catch (error: any) {
+      console.error("Error updating member:", error);
+      throw error;
+    }
+  };
+
+  const leaveTeam = async (teamId: string) => {
+    if (!user) throw new Error("Usuário não autenticado");
+
+    try {
+      const { error } = await supabase.from("team_members").delete().eq("team_id", teamId).eq("user_id", user.id);
+
+      if (error) throw error;
+
+      console.log("✅ Usuário saiu do time com sucesso");
+      await loadTeams();
+
+      if (currentTeam?.id === teamId) {
+        const remainingTeams = teams.filter((team) => team.id !== teamId);
+        setCurrentTeam(remainingTeams.length > 0 ? remainingTeams[0] : null);
+      }
+    } catch (error: any) {
+      console.error("❌ Erro ao sair do time:", error);
+      throw error;
+    }
+  };
+
+  const updateEvent = async (eventId: string, updates: Partial<Event>) => {
+    try {
+      const { error } = await supabase.from("events").update(updates).eq("id", eventId);
+
+      if (error) throw error;
+
+      console.log("✅ Evento atualizado com sucesso");
+      if (currentTeam) {
+        await loadEvents(currentTeam.id);
+      }
+    } catch (error: any) {
+      console.error("❌ Erro ao atualizar evento:", error);
+      throw error;
+    }
+  };
+
+  const deleteEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase.from("events").delete().eq("id", eventId);
+
+      if (error) throw error;
+
+      console.log("✅ Evento excluído com sucesso");
+      if (currentTeam) {
+        await loadEvents(currentTeam.id);
+      }
+    } catch (error: any) {
+      console.error("❌ Erro ao excluir evento:", error);
+      throw error;
+    }
+  };
+
+  const loadEvents = async (teamId: string) => {
+    try {
+      const { data, error } = await supabase.from("events").select("*").eq("team_id", teamId).order("start_date", { ascending: true });
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error: any) {
+      console.error("Erro ao carregar eventos:", error);
       throw error;
     }
   };
@@ -194,6 +329,12 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteTeam,
         loadTeams,
         inviteMember,
+        removeMember,
+        updateMember,
+        leaveTeam,
+        updateEvent,
+        deleteEvent,
+        loadEvents,
       }}
     >
       {children}

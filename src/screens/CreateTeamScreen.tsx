@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { useTeam } from '../contexts/TeamContext';
-import { SportType } from '../types';
-import { COLORS, SPORTS } from '../config/sports';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { useTeam } from "../contexts/TeamContext";
+import { SportType } from "../types";
+import { COLORS, SPORTS } from "../config/sports";
 
 interface CreateTeamScreenProps {
   sport: SportType;
@@ -13,15 +13,15 @@ interface CreateTeamScreenProps {
 
 export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onComplete }) => {
   const { createTeam } = useTeam();
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const selectedSport = SPORTS[sport];
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError('Nome do time é obrigatório');
+      setError("Nome do time é obrigatório");
       return;
     }
 
@@ -29,12 +29,12 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
       setLoading(true);
       await createTeam({
         name: name.trim(),
-        sport
+        sport,
       });
-      Alert.alert('Sucesso', 'Time criado com sucesso!');
+      Alert.alert("Sucesso", "Time criado com sucesso!");
       onComplete();
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao criar time');
+      Alert.alert("Erro", error.message || "Erro ao criar time");
     } finally {
       setLoading(false);
     }
@@ -46,9 +46,7 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
         <View style={styles.header}>
           <Text style={styles.emoji}>{selectedSport.emoji}</Text>
           <Text style={styles.title}>Criar Time de {selectedSport.name}</Text>
-          <Text style={styles.subtitle}>
-            Configure os detalhes básicos do seu time
-          </Text>
+          <Text style={styles.subtitle}>Configure os detalhes básicos do seu time</Text>
         </View>
 
         <View style={styles.form}>
@@ -57,7 +55,7 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
             value={name}
             onChangeText={(text) => {
               setName(text);
-              setError('');
+              setError("");
             }}
             placeholder="Ex: Equipe Campeã"
             error={error}
@@ -65,23 +63,14 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
 
           <View style={styles.info}>
             <Text style={styles.infoTitle}>Informações do Esporte</Text>
-            <Text style={styles.infoText}>
-              • {selectedSport.playersCount} jogadores em quadra
-            </Text>
-            <Text style={styles.infoText}>
-              • Posições: {selectedSport.positions.join(', ')}
-            </Text>
+            <Text style={styles.infoText}>• {selectedSport.playersCount} jogadores em quadra</Text>
+            <Text style={styles.infoText}>• Posições: {selectedSport.positions.join(", ")}</Text>
           </View>
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button
-          title="Criar Time"
-          onPress={handleCreate}
-          loading={loading}
-          fullWidth
-        />
+        <Button title="Criar Time" onPress={handleCreate} loading={loading} fullWidth />
       </View>
     </View>
   );
@@ -90,56 +79,56 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
-    padding: 24
+    padding: 24,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 32
+    alignItems: "center",
+    marginBottom: 32,
   },
   emoji: {
     fontSize: 80,
-    marginBottom: 16
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
-    textAlign: 'center'
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    textAlign: 'center'
+    textAlign: "center",
   },
   form: {
-    marginBottom: 24
+    marginBottom: 24,
   },
   info: {
     backgroundColor: COLORS.card,
     borderRadius: 12,
     padding: 16,
-    marginTop: 16
+    marginTop: 16,
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
-    marginBottom: 12
+    marginBottom: 12,
   },
   infoText: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: 4
+    marginBottom: 4,
   },
   footer: {
     padding: 24,
     backgroundColor: COLORS.card,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border
-  }
+    borderTopColor: COLORS.border,
+  },
 });

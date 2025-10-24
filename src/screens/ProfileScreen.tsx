@@ -1,43 +1,39 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/Button';
-import { COLORS, PLAN_LIMITS, PLAN_PRICES } from '../config/sports';
-import { SubscriptionPlan } from '../types';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from "react-native";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "../components/Button";
+import { COLORS, PLAN_LIMITS, PLAN_PRICES } from "../config/sports";
+import { SubscriptionPlan } from "../types";
 
 export const ProfileScreen = () => {
   const { user, signOut, updateSubscription } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('premium');
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("premium");
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sair',
-      'Tem certeza que deseja sair?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error: any) {
-              Alert.alert('Erro', error.message || 'Erro ao sair');
-            }
+    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await signOut();
+          } catch (error: any) {
+            Alert.alert("Erro", error.message || "Erro ao sair");
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleUpgrade = async () => {
     try {
       await updateSubscription(selectedPlan);
       setShowUpgradeModal(false);
-      Alert.alert('Sucesso', 'Plano atualizado com sucesso!');
+      Alert.alert("Sucesso", "Plano atualizado com sucesso!");
     } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao atualizar plano');
+      Alert.alert("Erro", error.message || "Erro ao atualizar plano");
     }
   };
 
@@ -47,12 +43,12 @@ export const ProfileScreen = () => {
 
   const getPlanName = (plan: SubscriptionPlan) => {
     switch (plan) {
-      case 'free':
-        return 'Free';
-      case 'premium':
-        return 'Premium';
-      case 'premium_pro':
-        return 'Premium Pro';
+      case "free":
+        return "Free";
+      case "premium":
+        return "Premium";
+      case "premium_pro":
+        return "Premium Pro";
     }
   };
 
@@ -73,31 +69,19 @@ export const ProfileScreen = () => {
           <View style={styles.limitsContainer}>
             <View style={styles.limitItem}>
               <Text style={styles.limitLabel}>Times</Text>
-              <Text style={styles.limitValue}>
-                {currentLimits.teams === 999 ? 'Ilimitado' : currentLimits.teams}
-              </Text>
+              <Text style={styles.limitValue}>{currentLimits.teams === 999 ? "Ilimitado" : currentLimits.teams}</Text>
             </View>
             <View style={styles.limitItem}>
               <Text style={styles.limitLabel}>Jogadas</Text>
-              <Text style={styles.limitValue}>
-                {currentLimits.plays === 999 ? 'Ilimitado' : currentLimits.plays}
-              </Text>
+              <Text style={styles.limitValue}>{currentLimits.plays === 999 ? "Ilimitado" : currentLimits.plays}</Text>
             </View>
             <View style={styles.limitItem}>
               <Text style={styles.limitLabel}>Chats</Text>
-              <Text style={styles.limitValue}>
-                {currentLimits.chats === 999 ? 'Ilimitado' : currentLimits.chats}
-              </Text>
+              <Text style={styles.limitValue}>{currentLimits.chats === 999 ? "Ilimitado" : currentLimits.chats}</Text>
             </View>
           </View>
-          
-          {user.subscription_plan === 'free' && (
-            <Button
-              title="Fazer Upgrade"
-              onPress={() => setShowUpgradeModal(true)}
-              fullWidth
-            />
-          )}
+
+          {user.subscription_plan === "free" && <Button title="Fazer Upgrade" onPress={() => setShowUpgradeModal(true)} fullWidth />}
         </View>
       </View>
 
@@ -122,12 +106,7 @@ export const ProfileScreen = () => {
       </View>
 
       <View style={styles.section}>
-        <Button
-          title="Sair"
-          onPress={handleSignOut}
-          variant="outline"
-          fullWidth
-        />
+        <Button title="Sair" onPress={handleSignOut} variant="outline" fullWidth />
       </View>
 
       <View style={styles.footer}>
@@ -135,22 +114,14 @@ export const ProfileScreen = () => {
       </View>
 
       {/* Upgrade Modal */}
-      <Modal
-        visible={showUpgradeModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowUpgradeModal(false)}
-      >
+      <Modal visible={showUpgradeModal} animationType="slide" transparent onRequestClose={() => setShowUpgradeModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Escolha seu Plano</Text>
 
             <TouchableOpacity
-              style={[
-                styles.planOption,
-                selectedPlan === 'premium' && styles.planOptionSelected
-              ]}
-              onPress={() => setSelectedPlan('premium')}
+              style={[styles.planOption, selectedPlan === "premium" && styles.planOptionSelected]}
+              onPress={() => setSelectedPlan("premium")}
             >
               <View style={styles.planHeader}>
                 <Text style={styles.planOptionName}>Premium</Text>
@@ -163,11 +134,8 @@ export const ProfileScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.planOption,
-                selectedPlan === 'premium_pro' && styles.planOptionSelected
-              ]}
-              onPress={() => setSelectedPlan('premium_pro')}
+              style={[styles.planOption, selectedPlan === "premium_pro" && styles.planOptionSelected]}
+              onPress={() => setSelectedPlan("premium_pro")}
             >
               <View style={styles.planHeader}>
                 <Text style={styles.planOptionName}>Premium Pro</Text>
@@ -181,17 +149,8 @@ export const ProfileScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.modalButtons}>
-              <Button
-                title="Cancelar"
-                onPress={() => setShowUpgradeModal(false)}
-                variant="outline"
-                fullWidth
-              />
-              <Button
-                title="Assinar"
-                onPress={handleUpgrade}
-                fullWidth
-              />
+              <Button title="Cancelar" onPress={() => setShowUpgradeModal(false)} variant="outline" fullWidth />
+              <Button title="Assinar" onPress={handleUpgrade} fullWidth />
             </View>
           </View>
         </View>
@@ -203,123 +162,123 @@ export const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
   },
   header: {
     backgroundColor: COLORS.primary,
     padding: 24,
-    alignItems: 'center',
-    paddingTop: 60
+    alignItems: "center",
+    paddingTop: 60,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
   },
   avatarText: {
     fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.primary
+    fontWeight: "700",
+    color: COLORS.primary,
   },
   name: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 4,
   },
   email: {
     fontSize: 14,
-    color: '#FFFFFF',
-    opacity: 0.9
+    color: "#FFFFFF",
+    opacity: 0.9,
   },
   section: {
     padding: 16,
-    marginTop: 8
+    marginTop: 8,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
-    marginBottom: 12
+    marginBottom: 12,
   },
   planCard: {
     backgroundColor: COLORS.card,
     padding: 20,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: COLORS.primary
+    borderColor: COLORS.primary,
   },
   planName: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primary,
-    marginBottom: 16
+    marginBottom: 16,
   },
   limitsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
   },
   limitItem: {
-    alignItems: 'center'
+    alignItems: "center",
   },
   limitLabel: {
     fontSize: 12,
     color: COLORS.textSecondary,
-    marginBottom: 4
+    marginBottom: 4,
   },
   limitValue: {
     fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text
+    fontWeight: "700",
+    color: COLORS.text,
   },
   menuItem: {
     backgroundColor: COLORS.card,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderRadius: 12,
-    marginBottom: 8
+    marginBottom: 8,
   },
   menuItemText: {
     fontSize: 16,
-    color: COLORS.text
+    color: COLORS.text,
   },
   menuItemIcon: {
     fontSize: 24,
-    color: COLORS.textSecondary
+    color: COLORS.textSecondary,
   },
   footer: {
     padding: 24,
-    alignItems: 'center'
+    alignItems: "center",
   },
   footerText: {
     fontSize: 12,
-    color: COLORS.textSecondary
+    color: COLORS.textSecondary,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 24,
   },
   modalContent: {
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 24,
-    maxHeight: '80%'
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 24,
-    textAlign: 'center'
+    textAlign: "center",
   },
   planOption: {
     backgroundColor: COLORS.background,
@@ -327,36 +286,36 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: COLORS.border
+    borderColor: COLORS.border,
   },
   planOptionSelected: {
     borderColor: COLORS.primary,
-    backgroundColor: `${COLORS.primary}10`
+    backgroundColor: `${COLORS.primary}10`,
   },
   planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   planOptionName: {
     fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.text
+    fontWeight: "700",
+    color: COLORS.text,
   },
   planPrice: {
     fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.primary
+    fontWeight: "600",
+    color: COLORS.primary,
   },
   planFeature: {
     fontSize: 14,
     color: COLORS.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   modalButtons: {
-    flexDirection: 'row',
+    flexDirection: "column",
     gap: 12,
-    marginTop: 8
-  }
+    marginTop: 8,
+  },
 });

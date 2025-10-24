@@ -1,7 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Sport } from '../types';
-import { COLORS } from '../config/sports';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
+import { Sport } from "../types";
+import { COLORS } from "../config/sports";
 
 interface SportCardProps {
   sport: Sport;
@@ -11,10 +11,7 @@ interface SportCardProps {
 
 export const SportCard: React.FC<SportCardProps> = ({ sport, onPress, selected }) => {
   return (
-    <TouchableOpacity
-      style={[styles.card, selected && styles.selectedCard]}
-      onPress={onPress}
-    >
+    <TouchableOpacity style={[styles.card, selected && styles.selectedCard]} onPress={onPress}>
       <Text style={styles.emoji}>{sport.emoji}</Text>
       <Text style={styles.name}>{sport.name}</Text>
       <View style={styles.info}>
@@ -29,30 +26,30 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
     borderColor: COLORS.border,
-    marginBottom: 12
+    marginBottom: 12,
   },
   selectedCard: {
     borderColor: COLORS.primary,
-    backgroundColor: `${COLORS.primary}10`
+    backgroundColor: `${COLORS.primary}10`,
   },
   emoji: {
     fontSize: 48,
-    marginBottom: 8
+    marginBottom: 8,
   },
   name: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   info: {
-    marginTop: 4
+    marginTop: 4,
   },
   infoText: {
     fontSize: 14,
-    color: COLORS.textSecondary
-  }
+    color: COLORS.textSecondary,
+  },
 });
