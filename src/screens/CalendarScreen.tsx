@@ -9,6 +9,9 @@ import { Input } from "../components/Input";
 import { COLORS } from "../config/sports";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EditEventModal } from "../components/EditEventModal";
+import * as Font from "expo-font";
+
+const NOME_FONTE = "BeVietnamSemibold";
 
 export const CalendarScreen = () => {
   const { currentTeam, updateEvent, deleteEvent } = useTeam();
@@ -22,16 +25,7 @@ export const CalendarScreen = () => {
   const [eventType, setEventType] = useState<EventType>("training");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    console.log("🔍 useEffect: currentTeam mudou:", currentTeam?.id);
-    if (currentTeam) {
-      loadEvents();
-    } else {
-      console.log("🔍 useEffect: Nenhum time selecionado");
-      setEvents([]);
-    }
-  }, [currentTeam]);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   const loadEvents = async () => {
     if (!currentTeam) {
@@ -143,6 +137,24 @@ export const CalendarScreen = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("🔍 useEffect: currentTeam mudou:", currentTeam?.id);
+    if (currentTeam) {
+      loadEvents();
+    } else {
+      console.log("🔍 useEffect: Nenhum time selecionado");
+      setEvents([]);
+    }
+  }, [currentTeam]);
+  
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() =>
+      setFontLoaded(true)
+    );
+  }, []);
+
+  if (!fontLoaded) return null;
+
   const getEventIcon = (type: EventType) => {
     switch (type) {
       case "training":
@@ -176,7 +188,7 @@ export const CalendarScreen = () => {
   if (!currentTeam) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Selecione um time para ver o calendário</Text>
+        <Text style={[styles.emptyText, styles.BeVietnamPro]}>Selecione um time para ver o calendário</Text>
       </View>
     );
   }
@@ -200,9 +212,9 @@ export const CalendarScreen = () => {
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Calendário</Text>
+          <Text style={[styles.title, styles.BeVietnamPro]}>Calendário</Text>
           <TouchableOpacity style={styles.createButton} onPress={() => setShowCreateModal(true)}>
-            <Text style={styles.createButtonText}>+ Novo Evento</Text>
+            <Text style={[styles.createButtonText, styles.BeVietnamPro]}>+ Novo Evento</Text>
           </TouchableOpacity>
         </View>
 
@@ -211,10 +223,10 @@ export const CalendarScreen = () => {
             events.map((event) => (
               <TouchableOpacity key={event.id} style={styles.eventCard} onPress={() => handleEditEvent(event)} activeOpacity={0.7}>
                 <View style={styles.eventHeader}>
-                  <Text style={styles.eventIcon}>{getEventIcon(event.type)}</Text>
+                  <Text style={[styles.eventIcon, styles.BeVietnamPro]}>{getEventIcon(event.type)}</Text>
                   <View style={styles.eventInfo}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventType}>{getEventTypeName(event.type)}</Text>
+                    <Text style={[styles.eventTitle, styles.BeVietnamPro]}>{event.title}</Text>
+                    <Text style={[styles.eventType, styles.BeVietnamPro]}>{getEventTypeName(event.type)}</Text>
                   </View>
 
                   {/* Botão de editar (ícone) */}
@@ -238,14 +250,14 @@ export const CalendarScreen = () => {
                 </Text>
 
                 {event.location && <Text style={styles.eventLocation}>📍 {event.location}</Text>}
-                {event.description && <Text style={styles.eventDescription}>{event.description}</Text>}
+                {event.description && <Text style={[styles.eventDescription, styles.BeVietnamPro]}>{event.description}</Text>}
 
-                <Text style={styles.editHint}>Toque para editar →</Text>
+                <Text style={[styles.editHint, styles.BeVietnamPro]}>Toque para editar →</Text>
               </TouchableOpacity>
             ))
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>Nenhum evento agendado</Text>
+              <Text style={[styles.emptyText, styles.BeVietnamPro]}>Nenhum evento agendado</Text>
               <Button title="Criar Primeiro Evento" onPress={() => setShowCreateModal(true)} />
             </View>
           )}
@@ -255,11 +267,11 @@ export const CalendarScreen = () => {
         <Modal visible={showCreateModal} animationType="slide" transparent onRequestClose={() => setShowCreateModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Novo Evento</Text>
+              <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Novo Evento</Text>
 
               <Input label="Título" value={title} onChangeText={setTitle} placeholder="Nome do evento" />
 
-              <Text style={styles.label}>Tipo de Evento</Text>
+              <Text style={[styles.label, styles.BeVietnamPro]}>Tipo de Evento</Text>
               <View style={styles.eventTypes}>
                 {(["training", "friendly", "championship", "meeting"] as EventType[]).map((type) => (
                   <TouchableOpacity
@@ -268,7 +280,7 @@ export const CalendarScreen = () => {
                     onPress={() => setEventType(type)}
                   >
                     <Text style={styles.typeEmoji}>{getEventIcon(type)}</Text>
-                    <Text style={styles.typeText}>{getEventTypeName(type)}</Text>
+                    <Text style={[styles.typeText, styles.BeVietnamPro]}>{getEventTypeName(type)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -476,4 +488,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "right",
   },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE
+  }
 });

@@ -1,21 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { useTeam } from "../contexts/TeamContext";
 import { SportType } from "../types";
 import { COLORS, SPORTS } from "../config/sports";
+import * as Font from "expo-font";
 
 interface CreateTeamScreenProps {
   sport: SportType;
   onComplete: () => void;
 }
 
+const NOME_FONTE = "BeVietnamSemibold";
+
 export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onComplete }) => {
   const { createTeam } = useTeam();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() =>
+      setFontLoaded(true)
+    );
+  }, []);
+
+  if (!fontLoaded) return null;
 
   const selectedSport = SPORTS[sport];
 
@@ -44,9 +56,9 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
     <View style={styles.container}>
       <ScrollView style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.emoji}>{selectedSport.emoji}</Text>
-          <Text style={styles.title}>Criar Time de {selectedSport.name}</Text>
-          <Text style={styles.subtitle}>Configure os detalhes básicos do seu time</Text>
+          <Text style={[styles.emoji, styles.BeVietnamPro]}>{selectedSport.emoji}</Text>
+          <Text style={[styles.title, styles.BeVietnamPro]}>Criar Time de {selectedSport.name}</Text>
+          <Text style={[styles.subtitle, styles.BeVietnamPro]}>Configure os detalhes básicos do seu time</Text>
         </View>
 
         <View style={styles.form}>
@@ -62,9 +74,9 @@ export const CreateTeamScreen: React.FC<CreateTeamScreenProps> = ({ sport, onCom
           />
 
           <View style={styles.info}>
-            <Text style={styles.infoTitle}>Informações do Esporte</Text>
-            <Text style={styles.infoText}>• {selectedSport.playersCount} jogadores em quadra</Text>
-            <Text style={styles.infoText}>• Posições: {selectedSport.positions.join(", ")}</Text>
+            <Text style={[styles.infoTitle, styles.BeVietnamPro]}>Informações do Esporte</Text>
+            <Text style={[styles.infoText, styles.BeVietnamPro]}>• {selectedSport.playersCount} jogadores em quadra</Text>
+            <Text style={[styles.infoText, styles.BeVietnamPro]}>• Posições: {selectedSport.positions.join(", ")}</Text>
           </View>
         </View>
       </ScrollView>
@@ -131,4 +143,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE
+  }
 });

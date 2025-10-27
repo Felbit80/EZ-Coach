@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../components/Button";
 import { COLORS, PLAN_LIMITS, PLAN_PRICES } from "../config/sports";
 import { SubscriptionPlan } from "../types";
+import * as Font from "expo-font";
+
+const NOME_FONTE = "BeVietnamSemibold";
 
 export const ProfileScreen = () => {
   const { user, signOut, updateSubscription } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("premium");
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert("Sair", "Tem certeza que deseja sair?", [
@@ -26,6 +30,14 @@ export const ProfileScreen = () => {
       },
     ]);
   };
+
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() =>
+      setFontLoaded(true)
+    );
+  }, []);
+
+  if (!fontLoaded) return null;
 
   const handleUpgrade = async () => {
     try {
@@ -56,28 +68,28 @@ export const ProfileScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
+          <Text style={[styles.avatarText, styles.BeVietnamPro]}>{user.name.charAt(0).toUpperCase()}</Text>
         </View>
-        <Text style={styles.name}>{user.name}</Text>
-        <Text style={styles.email}>{user.email}</Text>
+        <Text style={[styles.name, styles.BeVietnamPro]}>{user.name}</Text>
+        <Text style={[styles.email, styles.BeVietnamPro]}>{user.email}</Text>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Plano Atual</Text>
+        <Text style={[styles.sectionTitle, styles.BeVietnamPro]}>Plano Atual</Text>
         <View style={styles.planCard}>
-          <Text style={styles.planName}>{getPlanName(user.subscription_plan)}</Text>
+          <Text style={[styles.planName, styles.BeVietnamPro]}>{getPlanName(user.subscription_plan)}</Text>
           <View style={styles.limitsContainer}>
             <View style={styles.limitItem}>
-              <Text style={styles.limitLabel}>Times</Text>
-              <Text style={styles.limitValue}>{currentLimits.teams === 999 ? "Ilimitado" : currentLimits.teams}</Text>
+              <Text style={[styles.limitLabel, styles.BeVietnamPro]}>Times</Text>
+              <Text style={[styles.limitValue, styles.BeVietnamPro]}>{currentLimits.teams === 999 ? "Ilimitado" : currentLimits.teams}</Text>
             </View>
             <View style={styles.limitItem}>
-              <Text style={styles.limitLabel}>Jogadas</Text>
-              <Text style={styles.limitValue}>{currentLimits.plays === 999 ? "Ilimitado" : currentLimits.plays}</Text>
+              <Text style={[styles.limitLabel, styles.BeVietnamPro]}>Jogadas</Text>
+              <Text style={[styles.limitValue, styles.BeVietnamPro]}>{currentLimits.plays === 999 ? "Ilimitado" : currentLimits.plays}</Text>
             </View>
             <View style={styles.limitItem}>
-              <Text style={styles.limitLabel}>Chats</Text>
-              <Text style={styles.limitValue}>{currentLimits.chats === 999 ? "Ilimitado" : currentLimits.chats}</Text>
+              <Text style={[styles.limitLabel, styles.BeVietnamPro]}>Chats</Text>
+              <Text style={[styles.limitValue, styles.BeVietnamPro]}>{currentLimits.chats === 999 ? "Ilimitado" : currentLimits.chats}</Text>
             </View>
           </View>
 
@@ -86,22 +98,22 @@ export const ProfileScreen = () => {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Configurações</Text>
+        <Text style={[styles.sectionTitle, styles.BeVietnamPro]}>Configurações</Text>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuItemText}>Editar Perfil</Text>
-          <Text style={styles.menuItemIcon}>›</Text>
+          <Text style={[styles.menuItemText, styles.BeVietnamPro]}>Editar Perfil</Text>
+          <Text style={[styles.menuItemIcon, styles.BeVietnamPro]}>›</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuItemText}>Notificações</Text>
-          <Text style={styles.menuItemIcon}>›</Text>
+          <Text style={[styles.menuItemText, styles.BeVietnamPro]}>Notificações</Text>
+          <Text style={[styles.menuItemIcon, styles.BeVietnamPro]}>›</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuItemText}>Privacidade</Text>
-          <Text style={styles.menuItemIcon}>›</Text>
+          <Text style={[styles.menuItemText, styles.BeVietnamPro]}>Privacidade</Text>
+          <Text style={[styles.menuItemIcon, styles.BeVietnamPro]}>›</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuItemText}>Ajuda e Suporte</Text>
-          <Text style={styles.menuItemIcon}>›</Text>
+          <Text style={[styles.menuItemText, styles.BeVietnamPro]}>Ajuda e Suporte</Text>
+          <Text style={[styles.menuItemIcon, styles.BeVietnamPro]}>›</Text>
         </TouchableOpacity>
       </View>
 
@@ -110,27 +122,27 @@ export const ProfileScreen = () => {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>EZ Coach v1.0.0</Text>
+        <Text style={[styles.footerText, styles.BeVietnamPro]}>EZ Coach v1.0.0</Text>
       </View>
 
       {/* Upgrade Modal */}
       <Modal visible={showUpgradeModal} animationType="slide" transparent onRequestClose={() => setShowUpgradeModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Escolha seu Plano</Text>
+            <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Escolha seu Plano</Text>
 
             <TouchableOpacity
               style={[styles.planOption, selectedPlan === "premium" && styles.planOptionSelected]}
               onPress={() => setSelectedPlan("premium")}
             >
               <View style={styles.planHeader}>
-                <Text style={styles.planOptionName}>Premium</Text>
-                <Text style={styles.planPrice}>{PLAN_PRICES.premium}/mês</Text>
+                <Text style={[styles.planOptionName, styles.BeVietnamPro]}>Premium</Text>
+                <Text style={[styles.planPrice, styles.BeVietnamPro]}>{PLAN_PRICES.premium}/mês</Text>
               </View>
-              <Text style={styles.planFeature}>✓ 3 times</Text>
-              <Text style={styles.planFeature}>✓ 20 jogadas</Text>
-              <Text style={styles.planFeature}>✓ 5 chats</Text>
-              <Text style={styles.planFeature}>✓ Suporte prioritário</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ 3 times</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ 20 jogadas</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ 5 chats</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Suporte prioritário</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -138,14 +150,14 @@ export const ProfileScreen = () => {
               onPress={() => setSelectedPlan("premium_pro")}
             >
               <View style={styles.planHeader}>
-                <Text style={styles.planOptionName}>Premium Pro</Text>
-                <Text style={styles.planPrice}>{PLAN_PRICES.premium_pro}/mês</Text>
+                <Text style={[styles.planOptionName, styles.BeVietnamPro]}>Premium Pro</Text>
+                <Text style={[styles.planPrice, styles.BeVietnamPro]}>{PLAN_PRICES.premium_pro}/mês</Text>
               </View>
-              <Text style={styles.planFeature}>✓ Times ilimitados</Text>
-              <Text style={styles.planFeature}>✓ Jogadas ilimitadas</Text>
-              <Text style={styles.planFeature}>✓ Chats ilimitados</Text>
-              <Text style={styles.planFeature}>✓ Suporte VIP</Text>
-              <Text style={styles.planFeature}>✓ Recursos exclusivos</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Times ilimitados</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Jogadas ilimitadas</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Chats ilimitados</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Suporte VIP</Text>
+              <Text style={[styles.planFeature, styles.BeVietnamPro]}>✓ Recursos exclusivos</Text>
             </TouchableOpacity>
 
             <View style={styles.modalButtons}>
@@ -318,4 +330,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 8,
   },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE
+  }
 });

@@ -1,6 +1,7 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { COLORS } from "../config/sports";
+import { Text } from "./Text";
 
 interface ButtonProps {
   title: string;
@@ -36,6 +37,7 @@ export const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator color={variant === "outline" ? COLORS.primary : "#FFFFFF"} />
       ) : (
         <Text
+          variant="semibold"
           style={[
             styles.buttonText,
             variant === "primary" && styles.primaryText,

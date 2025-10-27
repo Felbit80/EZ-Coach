@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Image } from "react-native";
 import { useTeam } from "../contexts/TeamContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -12,6 +12,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { EditMemberModal } from "../components/EditMemberModal";
 import { TeamMember } from "../types/index";
 import { TeamMemberWithUser } from "../contexts/TeamContext";
+import * as Font from "expo-font";
+
+const NOME_FONTE = "BeVietnamSemibold";
 
 export const TeamsScreen = () => {
   const { user } = useAuth();
@@ -32,12 +35,21 @@ export const TeamsScreen = () => {
   const [showEditMemberModal, setShowEditMemberModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMemberWithUser | null>(null);
   const { removeMember, updateMember } = useTeam();
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   const canCreateTeam = () => {
     if (!user) return false;
     const limit = PLAN_LIMITS[user.subscription_plan].teams;
     return teams.length < limit;
   };
+
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() =>
+      setFontLoaded(true)
+    );
+  }, []);
+
+  if (!fontLoaded) return null;
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) {
@@ -158,9 +170,9 @@ export const TeamsScreen = () => {
       <View style={styles.container}>
         <ScrollView style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>Meus Times</Text>
+            <Text style={[styles.title, styles.BeVietnamPro]}>Meus Times</Text>
             <TouchableOpacity style={styles.addButton} onPress={() => setShowCreateModal(true)}>
-              <Text style={styles.addButtonText}>+ Novo Time</Text>
+              <Text style={[styles.addButtonText, styles.BeVietnamPro]}>+ Novo Time</Text>
             </TouchableOpacity>
           </View>
           {teams.map((team) => (
@@ -176,7 +188,7 @@ export const TeamsScreen = () => {
           ))}
           {teams.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>Você ainda não tem times</Text>
+              <Text style={[styles.emptyText, styles.BeVietnamPro]}>Você ainda não tem times</Text>
               <Button title="Criar Primeiro Time" onPress={() => setShowCreateModal(true)} />
             </View>
           )}
@@ -185,40 +197,40 @@ export const TeamsScreen = () => {
             <>
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Membros</Text>
+                  <Text style={[styles.sectionTitle, styles.BeVietnamPro]}>Membros</Text>
                   <TouchableOpacity onPress={() => setShowInviteModal(true)}>
-                    <Text style={styles.inviteButton}>+ Convidar</Text>
+                    <Text style={[styles.inviteButton, styles.BeVietnamPro]}>+ Convidar</Text>
                   </TouchableOpacity>
                 </View>
 
                 {teamMembers.map((member) => (
                   <TouchableOpacity key={member.id} style={styles.memberCard} onPress={() => handleEditMember(member)} activeOpacity={0.7}>
                     <View style={styles.memberInfo}>
-                      <Text style={styles.memberName}>{member.user?.name || `Usuário ${member.user_id.slice(0, 8)}`}</Text>
-                      <Text style={styles.memberEmail}>{member.user?.email || "Email não disponível"}</Text>
+                      <Text style={[styles.memberName, styles.BeVietnamPro]}>{member.user?.name || `Usuário ${member.user_id.slice(0, 8)}`}</Text>
+                      <Text style={[styles.memberEmail, styles.BeVietnamPro]}>{member.user?.email || "Email não disponível"}</Text>
                       <View style={styles.memberDetails}>
-                        <Text style={styles.memberRole}>
+                        <Text style={[styles.memberRole, styles.BeVietnamPro]}>
                           {member.role === "coach" && "👨‍🏫 Treinador"}
                           {member.role === "captain" && "👑 Capitão"}
                           {member.role === "athlete" && "🏃 Atleta"}
                         </Text>
-                        {member.position && <Text style={styles.memberPosition}>• {member.position}</Text>}
-                        {member.jersey_number && <Text style={styles.jerseyNumber}>• #{member.jersey_number}</Text>}
+                        {member.position && <Text style={[styles.memberPosition, styles.BeVietnamPro]}>• {member.position}</Text>}
+                        {member.jersey_number && <Text style={[styles.jerseyNumber, styles.BeVietnamPro]}>• #{member.jersey_number}</Text>}
                       </View>
                     </View>
 
                     {/* Ícone de edição */}
                     <View style={styles.editIcon}>
                       <Text style={styles.editIconText}>✏️</Text>
-                      <Text style={styles.editHint}>Editar</Text>
+                      <Text style={[styles.editHint, styles.BeVietnamPro]}>Editar</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
 
                 {teamMembers.length === 0 && (
                   <View style={styles.emptyMembers}>
-                    <Text style={styles.emptyMembersText}>Nenhum membro no time</Text>
-                    <Text style={styles.emptyMembersSubtext}>Convide membros para participar</Text>
+                    <Text style={[styles.emptyMembersText, styles.BeVietnamPro]}>Nenhum membro no time</Text>
+                    <Text style={[styles.emptyMembersSubtext, styles.BeVietnamPro]}>Convide membros para participar</Text>
                   </View>
                 )}
               </View>
@@ -230,11 +242,11 @@ export const TeamsScreen = () => {
         <Modal visible={showCreateModal} animationType="slide" transparent onRequestClose={() => setShowCreateModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Criar Novo Time</Text>
+              <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Criar Novo Time</Text>
 
               <Input label="Nome do Time" value={newTeamName} onChangeText={setNewTeamName} placeholder="Ex: Equipe Campeã" />
 
-              <Text style={styles.label}>Selecione o Esporte</Text>
+              <Text style={[styles.label, styles.BeVietnamPro]}>Selecione o Esporte</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sportsList}>
                 {Object.values(SPORTS).map((sport) => (
                   <TouchableOpacity
@@ -243,7 +255,7 @@ export const TeamsScreen = () => {
                     onPress={() => setSelectedSport(sport.id)}
                   >
                     <Text style={styles.sportEmoji}>{sport.emoji}</Text>
-                    <Text style={styles.sportName}>{sport.name}</Text>
+                    <Text style={[styles.sportName, styles.BeVietnamPro]}>{sport.name}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -260,7 +272,7 @@ export const TeamsScreen = () => {
         <Modal visible={showInviteModal} animationType="slide" transparent onRequestClose={() => setShowInviteModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Convidar Membro</Text>
+              <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Convidar Membro</Text>
 
               <Input
                 label="Email"
@@ -270,7 +282,7 @@ export const TeamsScreen = () => {
                 keyboardType="email-address"
               />
 
-              <Text style={styles.label}>Função</Text>
+              <Text style={[styles.label, styles.BeVietnamPro]}>Função</Text>
               <View style={styles.roleOptions}>
                 {(["athlete", "captain", "coach"] as UserRole[]).map((role) => (
                   <TouchableOpacity
@@ -278,7 +290,7 @@ export const TeamsScreen = () => {
                     style={[styles.roleOption, inviteRole === role && styles.roleOptionSelected]}
                     onPress={() => setInviteRole(role)}
                   >
-                    <Text style={styles.roleText}>
+                    <Text style={[styles.roleText, styles.BeVietnamPro]}>
                       {role === "coach" && "👨‍🏫 Treinador"}
                       {role === "captain" && "👑 Capitão"}
                       {role === "athlete" && "🏃 Atleta"}
@@ -299,8 +311,8 @@ export const TeamsScreen = () => {
         <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, styles.deleteModal]}>
-              <Text style={styles.deleteTitle}>Excluir Time</Text>
-              <Text style={styles.deleteText}>
+              <Text style={[styles.deleteTitle, styles.BeVietnamPro]}>Excluir Time</Text>
+              <Text style={[styles.deleteText, styles.BeVietnamPro]}>
                 Tem certeza que deseja excluir o time "{currentTeam?.name}"? Esta ação não pode ser desfeita.
               </Text>
 
@@ -316,11 +328,11 @@ export const TeamsScreen = () => {
         <Modal visible={showEditTeamModal} animationType="slide" transparent onRequestClose={() => setShowEditTeamModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Editar Time</Text>
+              <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Editar Time</Text>
 
               <Input label="Nome do Time" value={editTeamName} onChangeText={setEditTeamName} placeholder="Ex: Equipe Campeã" />
 
-              <Text style={styles.label}>Esporte</Text>
+              <Text style={[styles.label, styles.BeVietnamPro]}>Esporte</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sportsList}>
                 {Object.values(SPORTS).map((sport) => (
                   <TouchableOpacity
@@ -329,7 +341,7 @@ export const TeamsScreen = () => {
                     onPress={() => setEditSelectedSport(sport.id)}
                   >
                     <Text style={styles.sportEmoji}>{sport.emoji}</Text>
-                    <Text style={styles.sportName}>{sport.name}</Text>
+                    <Text style={[styles.sportName, styles.BeVietnamPro]}>{sport.name}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -582,4 +594,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE
+  }
 });

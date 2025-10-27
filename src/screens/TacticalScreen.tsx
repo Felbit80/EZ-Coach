@@ -11,6 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { DraggablePlayer } from "../components/DraggablePlayer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as Font from "expo-font";
+
+const NOME_FONTE = "BeVietnamSemibold";
 
 export const TacticalScreen = () => {
   const { currentTeam } = useTeam();
@@ -22,12 +25,7 @@ export const TacticalScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formationToDelete, setFormationToDelete] = useState<Formation | null>(null);
-
-  useEffect(() => {
-    if (currentTeam) {
-      loadFormations();
-    }
-  }, [currentTeam]);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   const loadFormations = async () => {
     if (!currentTeam) return;
@@ -186,6 +184,18 @@ export const TacticalScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (currentTeam) {
+      loadFormations();
+    }
+  }, [currentTeam]);
+
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() => setFontLoaded(true));
+  }, []);
+
+  if (!fontLoaded) return null;
+
   const openDeleteConfirm = (formation: Formation) => {
     setFormationToDelete(formation);
     setShowDeleteConfirm(true);
@@ -205,7 +215,7 @@ export const TacticalScreen = () => {
   if (!currentTeam) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Selecione um time para acessar o quadro tático</Text>
+        <Text style={[styles.emptyText, styles.BeVietnamPro]}>Selecione um time para acessar o quadro tático</Text>
       </View>
     );
   }
@@ -216,9 +226,9 @@ export const TacticalScreen = () => {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Quadro Tático </Text>
+          <Text style={[styles.title, styles.BeVietnamPro]}>Quadro Tático </Text>
           <TouchableOpacity style={styles.createButton} onPress={createDefaultFormation}>
-            <Text style={styles.createButtonText}>+ Nova Formação</Text>
+            <Text style={[styles.createButtonText, styles.BeVietnamPro]}>+ Nova Formação</Text>
           </TouchableOpacity>
         </View>
 
@@ -227,15 +237,15 @@ export const TacticalScreen = () => {
             <View style={styles.courtContainer}>
               <View style={styles.courtHeader}>
                 <View style={styles.courtTitleContainer}>
-                  <Text style={styles.courtTitle}>
+                  <Text style={[styles.courtTitle, styles.BeVietnamPro]}>
                     {sport.name} - {currentFormation.name}
                   </Text>
-                  <Text style={styles.courtSubtitle}>{currentFormation.players.length} jogadores</Text>
+                  <Text style={[styles.courtSubtitle, styles.BeVietnamPro]}>{currentFormation.players.length} jogadores</Text>
                 </View>
 
                 <View style={styles.courtActions}>
                   <TouchableOpacity style={styles.backButton} onPress={() => setCurrentFormation(null)}>
-                    <Text style={styles.backButtonText}>← Voltar</Text>
+                    <Text style={[styles.backButtonText, styles.BeVietnamPro]}>← Voltar</Text>
                   </TouchableOpacity>
 
                   <Button
@@ -273,20 +283,24 @@ export const TacticalScreen = () => {
               </View>
 
               <View style={styles.instructions}>
-                <Text style={styles.instructionsText}>💡 Dica: Em breve você poderá arrastar os jogadores para posicioná-los</Text>
+                <Text style={[styles.instructionsText, styles.BeVietnamPro]}>
+                  💡 Dica: Em breve você poderá arrastar os jogadores para posicioná-los
+                </Text>
               </View>
             </View>
           ) : (
             <>
-              <Text style={styles.sectionTitle}>Formações Salvas</Text>
+              <Text style={[styles.sectionTitle, styles.BeVietnamPro]}>Formações Salvas</Text>
               {formations.map((formation) => (
                 <View key={formation.id} style={styles.formationCard}>
                   <TouchableOpacity style={styles.formationContent} onPress={() => setCurrentFormation(formation)}>
-                    <Text style={styles.formationName}>{formation.name}</Text>
-                    <Text style={styles.formationInfo}>
+                    <Text style={[styles.formationName, styles.BeVietnamPro]}>{formation.name}</Text>
+                    <Text style={[styles.formationInfo, styles.BeVietnamPro]}>
                       {formation.players.length} jogadores • {formation.sport}
                     </Text>
-                    <Text style={styles.formationDate}>Criada em {new Date(formation.created_at).toLocaleDateString("pt-BR")}</Text>
+                    <Text style={[styles.formationDate, styles.BeVietnamPro]}>
+                      Criada em {new Date(formation.created_at).toLocaleDateString("pt-BR")}
+                    </Text>
                   </TouchableOpacity>
 
                   <View style={styles.formationActions}>
@@ -314,7 +328,7 @@ export const TacticalScreen = () => {
 
               {formations.length === 0 && (
                 <View style={styles.emptyState}>
-                  <Text style={styles.emptyText}>Nenhuma formação salva</Text>
+                  <Text style={[styles.emptyText, styles.BeVietnamPro]}>Nenhuma formação salva</Text>
                   <Button title="Criar Primeira Formação" onPress={createDefaultFormation} />
                 </View>
               )}
@@ -326,7 +340,7 @@ export const TacticalScreen = () => {
         <Modal visible={showSaveModal} animationType="slide" transparent onRequestClose={() => setShowSaveModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Salvar Formação</Text>
+              <Text style={[styles.modalTitle, styles.BeVietnamPro]}>Salvar Formação</Text>
 
               <Input label="Nome da Formação" value={formationName} onChangeText={setFormationName} placeholder="Ex: Formação 4-2" />
 
@@ -341,8 +355,8 @@ export const TacticalScreen = () => {
         <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, styles.deleteModal]}>
-              <Text style={styles.deleteTitle}>Excluir Formação</Text>
-              <Text style={styles.deleteText}>
+              <Text style={[styles.deleteTitle, styles.BeVietnamPro]}>Excluir Formação</Text>
+              <Text style={[styles.deleteText, styles.BeVietnamPro]}>
                 Tem certeza que deseja excluir a formação "{formationToDelete?.name}"? Esta ação não pode ser desfeita.
               </Text>
 
@@ -571,5 +585,8 @@ const styles = StyleSheet.create({
   },
   formationContent: {
     flex: 1,
+  },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE,
   },
 });

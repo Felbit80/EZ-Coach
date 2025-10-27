@@ -1,9 +1,20 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState, useRef } from "react";
+import { 
+  View, 
+  StyleSheet, 
+  ScrollView, 
+  Alert, 
+  Image, 
+  TouchableWithoutFeedback, 
+  Keyboard
+} from "react-native";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { Text } from "../components/Text";
 import { useAuth } from "../contexts/AuthContext";
 import { COLORS } from "../config/sports";
+import { useFonts } from "../hooks/useFonts";
+import { useKeyboard } from "../hooks/useKeyboard";
 
 interface SignUpScreenProps {
   onNavigateToLogin: () => void;
@@ -22,6 +33,12 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
     password?: string;
     confirmPassword?: string;
   }>({});
+  
+  const scrollViewRef = useRef<ScrollView>(null);
+  const fontsLoaded = useFonts();
+  const keyboardHeight = useKeyboard();
+
+  if (!fontsLoaded) return null;
 
   const validate = () => {
     const newErrors: any = {};
@@ -66,39 +83,79 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onNavigateToLogin })
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
+  // Função simples para fazer scroll quando o input é focado
+  const handleInputFocus = (offsetY: number = 100) => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: offsetY, animated: true });
+    }, 100);
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.emoji}>🏐</Text>
-        <Text style={styles.title}>Criar Conta</Text>
-        <Text style={styles.subtitle}>Comece a gerenciar seu time</Text>
-      </View>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <ScrollView 
+        ref={scrollViewRef}
+        style={styles.container} 
+        contentContainerStyle={[
+          styles.content,
+          { 
+            paddingBottom: keyboardHeight > 0 ? keyboardHeight + 200 : 24
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Image source={require("../../assets/volleyballIcon.png")} style={styles.image} />
+          <Text variant="bold" style={styles.title}>Criar Conta</Text>
+          <Text variant="medium" style={styles.subtitle}>Comece a gerenciar seu time</Text>
+        </View>
 
-      <View style={styles.form}>
-        <Input label="Nome Completo" value={name} onChangeText={setName} placeholder="Seu nome" error={errors.name} />
-        <Input
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          placeholder="seu@email.com"
-          keyboardType="email-address"
-          error={errors.email}
-        />
-        <Input label="Senha" value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry error={errors.password} />
-        <Input
-          label="Confirmar Senha"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          placeholder="••••••••"
-          secureTextEntry
-          error={errors.confirmPassword}
-        />
+        <View style={styles.form}>
+          <Input 
+            label="Nome Completo" 
+            value={name} 
+            onChangeText={setName} 
+            placeholder="Seu nome" 
+            error={errors.name}
+            onFocus={() => handleInputFocus(0)}
+          />
+          <Input
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="seu@email.com"
+            keyboardType="email-address"
+            error={errors.email}
+            onFocus={() => handleInputFocus(0)}
+          />
+          <Input 
+            label="Senha" 
+            value={password} 
+            onChangeText={setPassword} 
+            placeholder="••••••••" 
+            secureTextEntry 
+            error={errors.password}
+            onFocus={() => handleInputFocus(100)}
+          />
+          <Input
+            label="Confirmar Senha"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="••••••••"
+            secureTextEntry
+            error={errors.confirmPassword}
+            onFocus={() => handleInputFocus(200)}
+          />
 
-        <Button title="Criar Conta" onPress={handleSignUp} loading={loading} fullWidth />
-
-        <Button title="Já tenho conta" onPress={onNavigateToLogin} variant="outline" fullWidth />
-      </View>
-    </ScrollView>
+          <Button title="Criar Conta" onPress={handleSignUp} loading={loading} fullWidth />
+          <Button title="Já tenho conta" onPress={onNavigateToLogin} variant="outline" fullWidth />
+        </View>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -109,6 +166,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    paddingTop: 24,
     justifyContent: "center",
     minHeight: "100%",
   },
@@ -116,13 +174,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 16,
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 30,
   },
   title: {
     fontSize: 32,
-    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
   },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { useTeam } from "../contexts/TeamContext";
@@ -7,6 +7,7 @@ import { supabase } from "../config/supabase";
 import { Event } from "../types";
 import { COLORS, SPORTS } from "../config/sports";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { Text } from "../components/Text"
 
 type RootStackParamList = {
   Chat: undefined;
@@ -78,6 +79,20 @@ export const HomeScreen = () => {
     }
   };
 
+  const getSportImage = (sport: string) => {
+  switch (sport) {
+    case 'volleyball':
+      return require('../../assets/volleyballIcon.png');
+    case 'basketball':
+      return require('../../assets/basketballIcon.png');
+    case 'football':
+    case 'futsal':
+      return require('../../assets/footballIcon.png');
+    case 'handball':
+      return require('../../assets/handballIcon.png');
+  }
+};
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Bom dia";
@@ -109,33 +124,33 @@ export const HomeScreen = () => {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>{getGreeting()},</Text>
-          <Text style={styles.userName}>{user?.name}</Text>
+          <Text variant="semibold" style={styles.greeting}>{getGreeting()},</Text>
+          <Text variant="semibold" style={styles.userName}>{user?.name}</Text>
         </View>
 
         {currentTeam ? (
           <>
             <View style={styles.teamCard}>
-              <Text style={styles.teamEmoji}>{SPORTS[currentTeam.sport]?.emoji || "🏐"}</Text>
+              <Image source={getSportImage(currentTeam.sport)} style={styles.teamEmoji} />
               <View style={styles.teamInfo}>
-                <Text style={styles.teamName}>{currentTeam.name}</Text>
-                <Text style={styles.sportName}>{SPORTS[currentTeam.sport]?.name || "Voleibol"}</Text>
+                <Text variant="semibold" style={styles.teamName}>{currentTeam.name}</Text>
+                <Text variant="semibold" style={styles.sportName}>{SPORTS[currentTeam.sport]?.name || "Voleibol"}</Text>
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Próximos Eventos</Text>
+              <Text variant="semibold" style={styles.sectionTitle}>Próximos Eventos</Text>
               {upcomingEvents.length > 0 ? (
                 upcomingEvents.map((event) => (
                   <View key={event.id} style={styles.eventCard}>
-                    <Text style={styles.eventType}>
+                    <Text variant="semibold" style={styles.eventType}>
                       {event.type === "training" && "🏋️ Treino"}
                       {event.type === "friendly" && "🤝 Amistoso"}
                       {event.type === "championship" && "🏆 Campeonato"}
                       {event.type === "meeting" && "👥 Reunião"}
                     </Text>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventDate}>
+                    <Text variant="semibold" style={styles.eventTitle}>{event.title}</Text>
+                    <Text variant="semibold" style={styles.eventDate}>
                       {new Date(event.start_date).toLocaleDateString("pt-BR", {
                         day: "2-digit",
                         month: "long",
@@ -147,57 +162,57 @@ export const HomeScreen = () => {
                 ))
               ) : (
                 <View style={styles.emptyState}>
-                  <Text style={styles.emptyText}>Nenhum evento agendado</Text>
+                  <Text variant="semibold" style={styles.emptyText}>Nenhum evento agendado</Text>
                   <TouchableOpacity onPress={handleCalendarPress}>
-                    <Text style={styles.linkText}>Criar primeiro evento</Text>
+                    <Text variant="semibold" style={styles.linkText}>Criar primeiro evento</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ações Rápidas</Text>
+              <Text variant="semibold" style={styles.sectionTitle}>Ações Rápidas</Text>
               <View style={styles.quickActions}>
                 <TouchableOpacity style={styles.actionCard} onPress={handleTacticalPress}>
-                  <Text style={styles.actionEmoji}>📋</Text>
-                  <Text style={styles.actionText}>Quadro Tático</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>📋</Text>
+                  <Text variant="semibold" style={styles.actionText}>Quadro Tático</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionCard} onPress={handleChatPress}>
-                  <Text style={styles.actionEmoji}>💬</Text>
-                  <Text style={styles.actionText}>Chat</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>💬</Text>
+                  <Text variant="semibold" style={styles.actionText}>Chat</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionCard} onPress={handleCalendarPress}>
-                  <Text style={styles.actionEmoji}>📅</Text>
-                  <Text style={styles.actionText}>Eventos</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>📅</Text>
+                  <Text variant="semibold" style={styles.actionText}>Eventos</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.quickActions}>
                 <TouchableOpacity style={styles.actionCard} onPress={handleTeamsPress}>
-                  <Text style={styles.actionEmoji}>👥</Text>
-                  <Text style={styles.actionText}>Times</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>👥</Text>
+                  <Text variant="semibold" style={styles.actionText}>Times</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionCard}>
-                  <Text style={styles.actionEmoji}>📊</Text>
-                  <Text style={styles.actionText}>Estatísticas</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>📊</Text>
+                  <Text variant="semibold" style={styles.actionText}>Estatísticas</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionCard}>
-                  <Text style={styles.actionEmoji}>🏋️</Text>
-                  <Text style={styles.actionText}>Treinos</Text>
+                  <Text variant="semibold" style={styles.actionEmoji}>🏋️</Text>
+                  <Text variant="semibold" style={styles.actionText}>Treinos</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </>
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>Nenhum time selecionado</Text>
-            <Text style={styles.emptyText}>Crie ou selecione um time para começar</Text>
+            <Text variant="semibold" style={styles.emptyTitle}>Nenhum time selecionado</Text>
+            <Text variant="semibold" style={styles.emptyText}>Crie ou selecione um time para começar</Text>
             <TouchableOpacity onPress={handleTeamsPress}>
-              <Text style={styles.linkText}>Ir para Times</Text>
+              <Text variant="semibold" style={styles.linkText}>Ir para Times</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -244,8 +259,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   teamEmoji: {
-    fontSize: 48,
-    marginRight: 16,
+    width: 40,
+    height: 40,
+    marginRight: 20
   },
   teamInfo: {
     flex: 1,

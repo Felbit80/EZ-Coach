@@ -3,7 +3,7 @@ export type SportType = "volleyball" | "basketball" | "handball" | "futsal" | "f
 export interface Sport {
   id: SportType;
   name: string;
-  emoji: string;
+  image: string;
   playersCount: number;
   positions: string[];
   courtDimensions: {

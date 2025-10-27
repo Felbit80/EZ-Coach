@@ -4,7 +4,7 @@ export const SPORTS: Record<SportType, Sport> = {
   volleyball: {
     id: "volleyball",
     name: "Voleibol",
-    emoji: "🏐",
+    image: require("../../assets/volleyballIcon.png"),
     playersCount: 6,
     positions: ["Ponteiro", "Oposto", "Levantador", "Central", "Líbero"],
     courtDimensions: { width: 300, height: 600 },
@@ -12,7 +12,7 @@ export const SPORTS: Record<SportType, Sport> = {
   basketball: {
     id: "basketball",
     name: "Basquete",
-    emoji: "🏀",
+    image: require("../../assets/basketballIcon.png"),
     playersCount: 5,
     positions: ["Armador", "Ala-armador", "Ala", "Ala-pivô", "Pivô"],
     courtDimensions: { width: 280, height: 500 },
@@ -20,7 +20,7 @@ export const SPORTS: Record<SportType, Sport> = {
   handball: {
     id: "handball",
     name: "Handebol",
-    emoji: "🤾",
+    image: require("../../assets/handballIcon.png"),
     playersCount: 7,
     positions: ["Goleiro", "Armador Central", "Meias", "Pontas", "Pivô"],
     courtDimensions: { width: 300, height: 500 },
@@ -28,7 +28,7 @@ export const SPORTS: Record<SportType, Sport> = {
   futsal: {
     id: "futsal",
     name: "Futsal",
-    emoji: "⚽",
+    image: require("../../assets/footballIcon.png"),
     playersCount: 5,
     positions: ["Goleiro", "Fixo", "Ala", "Pivô"],
     courtDimensions: { width: 300, height: 500 },
@@ -36,7 +36,7 @@ export const SPORTS: Record<SportType, Sport> = {
   football: {
     id: "football",
     name: "Futebol",
-    emoji: "⚽",
+    image: require("../../assets/footballIcon.png"),
     playersCount: 11,
     positions: ["Goleiro", "Lateral", "Zagueiro", "Volante", "Meia", "Atacante"],
     courtDimensions: { width: 350, height: 600 },

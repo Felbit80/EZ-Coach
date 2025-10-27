@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { Text } from "./Text";
 import { Team } from "../types";
 import { COLORS, SPORTS } from "../config/sports";
 
@@ -33,15 +34,15 @@ export const TeamCard: React.FC<TeamCardProps> = ({ team, selected = false, onPr
           <View style={styles.teamInfo}>
             <Text style={styles.emoji}>{sport.emoji}</Text>
             <View style={styles.textContainer}>
-              <Text style={styles.teamName}>{team.name}</Text>
-              <Text style={styles.sportName}>{sport.name}</Text>
+              <Text variant="semibold" style={styles.teamName}>{team.name}</Text>
+              <Text variant="semibold" style={styles.sportName}>{sport.name}</Text>
             </View>
           </View>
 
           {showActions && (
             <View style={styles.actions}>
               <TouchableOpacity style={styles.editButton} onPress={onEdit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Text style={styles.editButtonText}>✏️</Text>
+                <Text>✏️</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -49,17 +50,19 @@ export const TeamCard: React.FC<TeamCardProps> = ({ team, selected = false, onPr
                 onPress={handleDeletePress}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.deleteButtonText}>🗑️</Text>
+                <Text>🗑️</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
         <View style={styles.details}>
-          <Text style={styles.detailText}>
+          <Text variant="semibold" style={styles.detailText}>
             👥 {sport.playersCount} jogadores • {sport.positions.length} posições
           </Text>
-          <Text style={styles.createdAt}>Criado em {new Date(team.created_at).toLocaleDateString("pt-BR")}</Text>
+          <Text variant="semibold" style={styles.createdAt}>
+            Criado em {new Date(team.created_at).toLocaleDateString("pt-BR")}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -110,14 +113,12 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: 18,
-    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
   },
   sportName: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    fontWeight: "500",
   },
   actions: {
     flexDirection: "row",
@@ -129,16 +130,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: `${COLORS.primary}15`,
   },
-  editButtonText: {
-    fontSize: 16,
-  },
   deleteButton: {
     padding: 6,
     borderRadius: 6,
     backgroundColor: `${COLORS.error}15`,
-  },
-  deleteButtonText: {
-    fontSize: 16,
   },
   details: {
     borderTopWidth: 1,

@@ -1,54 +1,51 @@
 import React from "react";
-import { View, TextInput, Text, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet, TextInputProps } from "react-native";
 import { COLORS } from "../config/sports";
+import { Text } from "./Text";
 
-interface InputProps {
+interface InputProps extends TextInputProps {
   label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   error?: string;
-  multiline?: boolean;
+  variant?: 'semibold';
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input = React.forwardRef<TextInput, InputProps>(({
   label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  keyboardType = "default",
+  variant = "regular",
   error,
-  multiline = false,
-}) => {
+  style,
+  ...props
+}, ref) => {
+  const getFontFamily = () => {
+    return 'BeVietnamSemibold';
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text variant="semibold" style={styles.label}>{label}</Text>
       <TextInput
-        style={[styles.input, error && styles.inputError, multiline && styles.multiline]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        multiline={multiline}
-        numberOfLines={multiline ? 4 : 1}
+        ref={ref}
+        style={[
+          styles.input,
+          { fontFamily: getFontFamily() },
+          error && styles.inputError,
+          props.multiline && styles.multiline,
+          style
+        ]}
         placeholderTextColor={COLORS.textSecondary}
+        {...props}
       />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text variant="regular" style={styles.errorText}>{error}</Text>}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
     color: COLORS.text,
     marginBottom: 8,
   },

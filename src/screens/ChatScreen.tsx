@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -19,37 +19,24 @@ import { Chat, Message } from "../types";
 import { COLORS } from "../config/sports";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RefreshControl } from "react-native";
+import * as Font from "expo-font";
+
+const NOME_FONTE = "BeVietnamSemibold";
 
 export const ChatScreen = () => {
   const { currentTeam } = useTeam();
   const { user } = useAuth();
+
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
-  useEffect(() => {
-    if (currentTeam) {
-      loadChats();
-    }
-  }, [currentTeam]);
-
-  useEffect(() => {
-    if (selectedChat) {
-      loadMessages();
-      const subscription = subscribeToMessages();
-
-      return () => {
-        if (subscription) {
-          subscription.unsubscribe();
-        }
-      };
-    }
-  }, [selectedChat]);
+  const flatListRef = useRef<FlatList>(null);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -66,7 +53,7 @@ export const ChatScreen = () => {
     }
   };
 
-  const loadChats = async () => {
+  const loadChats = useCallback(async () => {
     if (!currentTeam) return;
 
     try {
@@ -93,7 +80,7 @@ export const ChatScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentTeam, selectedChat]);
 
   const createDefaultChat = async () => {
     if (!currentTeam) return;
@@ -258,6 +245,31 @@ export const ChatScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (selectedChat) {
+      loadMessages();
+      const subscription = subscribeToMessages();
+
+      return () => {
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+      };
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    Font.loadAsync({ [NOME_FONTE]: require("../../assets/BeVietnamPro-SemiBold.ttf") }).then(() => setFontLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (currentTeam) {
+      loadChats();
+    }
+  }, [currentTeam, loadChats]);
+
+  if (!fontLoaded) return null;
+
   const getChatIcon = (type: Chat["type"]) => {
     switch (type) {
       case "general":
@@ -282,11 +294,13 @@ export const ChatScreen = () => {
 
     return (
       <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessage : styles.otherMessage]}>
-        {!isOwnMessage && <Text style={styles.messageSender}>{item.user?.name || "Usuário"}</Text>}
+        {!isOwnMessage && <Text style={[styles.messageSender, styles.BeVietnamPro]}>{item.user?.name || "Usuário"}</Text>}
         <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble]}>
-          <Text style={[styles.messageText, isOwnMessage ? styles.ownMessageText : styles.otherMessageText]}>{item.content}</Text>
+          <Text style={[styles.messageText, isOwnMessage ? styles.ownMessageText : styles.otherMessageText, styles.BeVietnamPro]}>
+            {item.content}
+          </Text>
         </View>
-        <Text style={styles.messageTime}>
+        <Text style={[styles.messageTime, styles.BeVietnamPro]}>
           {new Date(item.created_at).toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -299,7 +313,7 @@ export const ChatScreen = () => {
   if (!currentTeam) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Selecione um time para acessar o chat</Text>
+        <Text style={[styles.emptyText, styles.BeVietnamPro]}>Selecione um time para acessar o chat</Text>
       </View>
     );
   }
@@ -325,7 +339,9 @@ export const ChatScreen = () => {
                 style={[styles.chatTab, selectedChat?.id === chat.id && styles.chatTabActive]}
                 onPress={() => setSelectedChat(chat)}
               >
-                <Text style={[styles.chatName, selectedChat?.id === chat.id && styles.chatNameActive]}>{getChatDisplayName(chat)}</Text>
+                <Text style={[styles.chatName, selectedChat?.id === chat.id && styles.chatNameActive, styles.BeVietnamPro]}>
+                  {getChatDisplayName(chat)}
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -335,7 +351,7 @@ export const ChatScreen = () => {
         {loading && messages.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>Carregando mensagens...</Text>
+            <Text style={[styles.loadingText, styles.BeVietnamPro]}>Carregando mensagens...</Text>
           </View>
         ) : (
           <FlatList
@@ -358,8 +374,8 @@ export const ChatScreen = () => {
             }}
             ListEmptyComponent={
               <View style={styles.emptyMessages}>
-                <Text style={styles.emptyMessagesText}>Nenhuma mensagem ainda</Text>
-                <Text style={styles.emptyMessagesSubtext}>
+                <Text style={[styles.emptyMessagesText, styles.BeVietnamPro]}>Nenhuma mensagem ainda</Text>
+                <Text style={[styles.emptyMessagesSubtext, styles.BeVietnamPro]}>
                   {selectedChat?.type === "general" && "Inicie uma conversa com o time!"}
                   {selectedChat?.type === "strategy" && "Discuta estratégias e táticas aqui!"}
                   {selectedChat?.type === "training" && "Compartilhe dicas de treino!"}
@@ -372,7 +388,7 @@ export const ChatScreen = () => {
         {/* Input area */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.BeVietnamPro]}
             value={newMessage}
             onChangeText={setNewMessage}
             placeholder={`Enviar mensagem em ${selectedChat?.name || "chat"}...`}
@@ -386,7 +402,11 @@ export const ChatScreen = () => {
             onPress={handleSendMessage}
             disabled={!newMessage.trim() || sending}
           >
-            {sending ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={styles.sendButtonText}>Enviar</Text>}
+            {sending ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={[styles.sendButtonText, styles.BeVietnamPro]}>Enviar</Text>
+            )}
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -441,6 +461,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     backgroundColor: COLORS.background,
+    fontFamily: NOME_FONTE,
   },
   messagesContent: {
     padding: 16,
@@ -470,6 +491,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 18,
     maxWidth: "100%",
+    fontFamily: NOME_FONTE,
   },
   ownBubble: {
     backgroundColor: COLORS.primary,
@@ -527,6 +549,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     minWidth: 80,
+    fontFamily: NOME_FONTE,
   },
   sendButtonDisabled: {
     opacity: 0.5,
@@ -575,5 +598,8 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     opacity: 0.7,
     textAlign: "center",
+  },
+  BeVietnamPro: {
+    fontFamily: NOME_FONTE,
   },
 });

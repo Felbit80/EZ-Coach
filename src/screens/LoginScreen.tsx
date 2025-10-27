@@ -1,8 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import { 
+  View, 
+  StyleSheet, 
+  ScrollView, 
+  Alert, 
+  Image, 
+  Keyboard,
+  TouchableWithoutFeedback
+} from "react-native";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { Text } from "../components/Text";
 import { useAuth } from "../contexts/AuthContext";
+import { useFonts } from "../hooks/useFonts";
+import { useKeyboard } from "../hooks/useKeyboard";
 import { COLORS } from "../config/sports";
 
 interface LoginScreenProps {
@@ -15,6 +26,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const fontsLoaded = useFonts();
+  const keyboardHeight = useKeyboard();
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -35,6 +49,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
     return Object.keys(newErrors).length === 0;
   };
 
+  if (!fontsLoaded) return null;
+
   const handleLogin = async () => {
     if (!validate()) return;
 
@@ -48,30 +64,52 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignUp }) 
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.emoji}>🏐</Text>
-        <Text style={styles.title}>EZ Coach</Text>
-        <Text style={styles.subtitle}>Gerencie seu time com facilidade</Text>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <View style={styles.container}>
+        <ScrollView 
+          style={styles.container} 
+          contentContainerStyle={[
+            styles.content,
+            { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 20 : 24 } // 👈 Ajuste dinâmico
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Image source={require("../../assets/volleyballIcon.png")} style={styles.image} />
+            <Text variant="semibold" style={styles.title}>EZ Coach</Text>
+            <Text variant="semibold" style={styles.subtitle}>Gerencie seu time com facilidade</Text>
+          </View>
+
+          <View style={styles.form}>
+            <Input
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="seu@email.com"
+              keyboardType="email-address"
+              error={errors.email}
+            />
+            <Input 
+              label="Senha" 
+              value={password} 
+              onChangeText={setPassword} 
+              placeholder="••••••••" 
+              secureTextEntry 
+              error={errors.password} 
+            />
+
+            <Button title="Entrar" onPress={handleLogin} loading={loading} fullWidth />
+            <Button title="Criar conta" onPress={onNavigateToSignUp} variant="outline" fullWidth />
+          </View>
+        </ScrollView>
       </View>
-
-      <View style={styles.form}>
-        <Input
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          placeholder="seu@email.com"
-          keyboardType="email-address"
-          error={errors.email}
-        />
-        <Input label="Senha" value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry error={errors.password} />
-
-        <Button title="Entrar" onPress={handleLogin} loading={loading} fullWidth />
-
-        <Button title="Criar conta" onPress={onNavigateToSignUp} variant="outline" fullWidth />
-      </View>
-    </ScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -82,6 +120,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
+    paddingTop: 24, // 👈 Garante padding consistente
     justifyContent: "center",
     minHeight: "100%",
   },
@@ -89,13 +128,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 16,
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 30
   },
   title: {
     fontSize: 32,
-    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
   },
